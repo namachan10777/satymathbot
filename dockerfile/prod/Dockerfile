@@ -50,18 +50,19 @@ RUN wget https://github.com/namachan10777/magicpak/releases/latest/download/magi
 	rsync -a /bundle_satysfi/ /bundle && \
 	rsync -a /bundle_pdftoppm/ /bundle
 
-RUN mkdir /bundle_home && \
-	mkdir /bundle_home/.opam && \
-	mkdir /bundle_home/.opam/4.11.1 && \
-	mkdir /bundle_home/.opam/4.11.1/share && \
-	mkdir /bundle/local/ && \
-	mkdir /bundle/local/share
+RUN mkdir /bundle/home && \
+	mkdir /bundle/home/satymathbot && \
+	mkdir /bundle/home/satymathbot/.opam && \
+	mkdir /bundle/home/satymathbot/.opam/4.11.1 && \
+	mkdir /bundle/home/satymathbot/.opam/4.11.1/share && \
+	mkdir /bundle/usr/local/share
 
-RUN cp -r /home/satymathbot/.satysfi /bundle/local/share/
-RUN cp -r /home/satymathbot/.opam/4.11.1/share/satysfi /bundle_home/.opam/4.11.1/satysfi
+RUN cp -r /home/satymathbot/.satysfi /bundle/usr/local/share/satysfi
+RUN cp -r /home/satymathbot/.opam/4.11.1/share/satysfi /bundle/home/satymathbot/.opam/4.11.1/share/satysfi
 
 FROM scratch
 COPY --from=builder /bundle /
-COPY --from=builder /bundle_home /home/satymathbot
+COPY satysfi/empty.satyh /usr/local/share/satysfi/dist/packages/
 
+EXPOSE 8080
 ENTRYPOINT [ "/usr/local/bin/satymathbot" ]
