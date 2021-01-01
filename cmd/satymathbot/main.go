@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+const dir_prefix = "/tmp/satymathbot/"
+
 func generateSatysfiSource(decodedMath string) (string, error) {
     // TODO check paren balance
 	var b strings.Builder
@@ -19,26 +21,36 @@ func generateSatysfiSource(decodedMath string) (string, error) {
 	return b.String(), nil
 }
 
-func compile_to_png(base64Math string) (string, error) {
+func createSatysfiSource(base64Math string) error {
 	decoded, err := base64.RawStdEncoding.DecodeString(base64Math)
-	if err != nil {
-		log.Printf("Cannot decode %s", base64Math)
-		return "", err
-	}
-	saty_name := "/tmp/satymathbot/" + base64Math + ".saty"
-	pdf_name := "/tmp/satymathbot/" + base64Math + ".pdf"
-	png_name := "/tmp/satymathbot/" + base64Math + "-1.png"
+    if err != nil {
+        log.Printf("cannot decode mathematics %s (%q)", base64Math, err)
+        return err
+    }
+	f, err := os.Create(dir_prefix + base64Math + ".saty")
+    defer f.Close()
+    if err != nil {
+        log.Printf("cannot create satyfi source file (%q)", err)
+        return err
+    }
+	satysfi_source, err := generateSatysfiSource(string(decoded))
+    if err != nil {
+        log.Printf("something went wrong when generating satysfi source from %s (%q)", base64Math, err)
+        return err
+    }
+	f.WriteString(satysfi_source)
+    return nil
+}
+
+func compile_to_png(base64Math string) error {
+	saty_name := dir_prefix + base64Math + ".saty"
+	pdf_name  := dir_prefix + base64Math + ".pdf"
+	png_name  := dir_prefix + base64Math + "-1.png"
 	if _, err := os.Stat(png_name); err != nil {
-		f, err := os.Create(saty_name)
-        if err != nil {
-            log.Fatal(err)
-        }
-		satysfi_source, err := generateSatysfiSource(string(decoded))
+        err = createSatysfiSource(base64Math)
 		if err != nil {
-			return "", err
+			return err
 		}
-		f.WriteString(satysfi_source)
-        defer f.Close()
         _, err = exec.Command("satysfi", saty_name, "-o", pdf_name).Output()
         if err != nil {
             log.Fatal(err)
@@ -48,12 +60,12 @@ func compile_to_png(base64Math string) (string, error) {
             log.Fatal(err)
         }
 	}
-	return "ok", nil
+	return nil
 }
 
 func handleRequest(w http.ResponseWriter, r *http.Request) {
     base64Math := r.URL.Path[1:]
-	if _, err := compile_to_png(base64Math); err == nil {
+	if err := compile_to_png(base64Math); err == nil {
         img, err := os.Open("/tmp/satymathbot/" + base64Math + "-1.png")
         if err != nil {
             log.Fatal(err)
