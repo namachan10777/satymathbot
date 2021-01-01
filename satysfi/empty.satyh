@@ -23,12 +23,13 @@ end = struct
   let get-standard-context wid =
     get-initial-context wid (command \math)
       |> set-math-font `lmodern`
+      |> set-font-size 30pt
 
 
   let document m =
     % -- constants
     let thickness = 0.5pt in
-    let ctx-doc = get-standard-context 400pt in
+    let ctx = get-standard-context 400pt in
     % -- page settings --
     let pagecontf _ =
       (|
@@ -44,7 +45,7 @@ end = struct
         footer-content = block-nil;
       |)
     in
-    let bb = read-inline ctx-doc {${#m}} |> form-paragraph ctx-doc in
+    let bb = read-inline ctx {${#m}} |> form-paragraph ctx in
     page-break A4Paper pagecontf pagepartsf bb
 end
 
