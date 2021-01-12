@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"image"
 	"image/png"
@@ -14,7 +13,7 @@ import (
 	"strings"
 )
 
-const dir_prefix = "/tmp/satymathbot/"
+const dirPrefix = "/tmp/satymathbot/"
 
 func generateSatysfiSource(decodedMath string) (string, error) {
 	// TODO check paren balance
@@ -30,51 +29,51 @@ func createSatysfiSource(base64Math string) error {
 		log.Printf("cannot decode mathematics %s (%q)", base64Math, err)
 		return err
 	}
-	f, err := os.Create(dir_prefix + base64Math + ".saty")
+	f, err := os.Create(dirPrefix + base64Math + ".saty")
 	defer f.Close()
 	if err != nil {
 		log.Printf("cannot create satyfi source file (%q)", err)
 		return err
 	}
-	satysfi_source, err := generateSatysfiSource(string(decoded))
+	satysfiSource, err := generateSatysfiSource(string(decoded))
 	if err != nil {
 		log.Printf("something went wrong when generating satysfi source from %s (%q)", base64Math, err)
 		return err
 	}
-	f.WriteString(satysfi_source)
+	f.WriteString(satysfiSource)
 	return nil
 }
 
-func png_name(base64Math string) string {
-	return dir_prefix + base64Math + ".png"
+func pngName(base64Math string) string {
+	return dirPrefix + base64Math + ".png"
 }
 
-func compile_to_png(base64Math string) error {
-	saty_name := dir_prefix + base64Math + ".saty"
-	pdf_name := dir_prefix + base64Math + ".pdf"
+func compileToPng(base64Math string) error {
+	satyName := dirPrefix + base64Math + ".saty"
+	pdfName := dirPrefix + base64Math + ".pdf"
 	err := createSatysfiSource(base64Math)
 	if err != nil {
 		return err
 	}
-	_, err = exec.Command("satysfi", saty_name, "-o", pdf_name).Output()
+	_, err = exec.Command("satysfi", satyName, "-o", pdfName).Output()
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = exec.Command("pdftoppm", pdf_name, "-png", "/tmp/satymathbot/"+base64Math).Output()
+	_, err = exec.Command("pdftoppm", pdfName, "-png", "/tmp/satymathbot/"+base64Math).Output()
 	if err != nil {
 		log.Fatal(err)
 	}
 	return nil
 }
 
-func Max(a int, b int) int {
+func max(a int, b int) int {
 	if a > b {
 		return a
 	}
 	return b
 }
 
-func Min(a int, b int) int {
+func min(a int, b int) int {
 	if a < b {
 		return a
 	}
@@ -82,7 +81,7 @@ func Min(a int, b int) int {
 }
 
 // 存在し読み込めるpngを必ず渡すことj
-func crop_png(fileName string, writeFileName string) error {
+func cropPng(fileName string, writeFileName string) error {
 	reader, err := os.Open(fileName)
 	defer reader.Close()
 	if err != nil {
@@ -93,32 +92,32 @@ func crop_png(fileName string, writeFileName string) error {
 		log.Fatalf("cannot decode png file \"%s\"", fileName)
 	}
 	bounds := m.Bounds()
-	min_x := 300
-	min_y := 300
-	max_x := 0
-	max_y := 0
+	minX := 300
+	minY := 300
+	maxX := 0
+	maxY := 0
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
 			r, g, b, _ := m.At(x, y).RGBA()
 			if r != 65535 || g != 65535 || b != 65535 {
-				min_x = Min(min_x, x)
-				min_y = Min(min_y, y)
-				max_x = Max(max_x, x)
-				max_y = Max(max_y, y)
+				minX = min(minX, x)
+				minY = min(minY, y)
+				maxX = max(maxX, x)
+				maxY = max(maxY, y)
 			}
 		}
 	}
-	x_size := max_x - min_x
-	y_size := max_y - min_y
-	if x_size < 0 || y_size < 0 {
-		return errors.New(fmt.Sprintf("empty png %s", fileName))
+	xSize := maxX - minX
+	ySize := maxY - minY
+	if xSize < 0 || ySize < 0 {
+		return fmt.Errorf("empty png %s", fileName)
 	}
 	cropped := image.NewRGBA(
-		image.Rectangle{image.Point{0, 0}, image.Point{x_size, y_size}},
+		image.Rectangle{image.Point{0, 0}, image.Point{xSize, ySize}},
 	)
-	for x := 0; x < x_size; x++ {
-		for y := 0; y < y_size; y++ {
-			cropped.Set(x, y, m.At(x+min_x, y+min_y))
+	for x := 0; x < xSize; x++ {
+		for y := 0; y < ySize; y++ {
+			cropped.Set(x, y, m.At(x+minX, y+minY))
 		}
 	}
 	w, err := os.Create(writeFileName)
@@ -135,11 +134,11 @@ func crop_png(fileName string, writeFileName string) error {
 func handleRequest(w http.ResponseWriter, r *http.Request) {
 	base64Math := r.URL.Path[1:]
 	// cache miss
-	if _, err := os.Stat(png_name(base64Math)); err != nil {
+	if _, err := os.Stat(pngName(base64Math)); err != nil {
 		log.Printf("cache miss %s", base64Math)
-		err = compile_to_png(base64Math)
+		err = compileToPng(base64Math)
 		if err == nil {
-			err = crop_png("/tmp/satymathbot/" + base64Math + "-1.png", png_name(base64Math))
+			err = cropPng("/tmp/satymathbot/"+base64Math+"-1.png", pngName(base64Math))
 			if err != nil {
 				log.Printf("cannt crop png file (%q)", err)
 				return
@@ -149,7 +148,7 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	img, err := os.Open(png_name(base64Math))
+	img, err := os.Open(pngName(base64Math))
 	if err != nil {
 		log.Fatalf("cannot read compiled png file (%q)", err)
 	}

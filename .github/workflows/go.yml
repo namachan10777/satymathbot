@@ -18,3 +18,14 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+
+    - name: Vet
+      run: go vet ./...
+
+    - name: Fmt
+      run:
+        go fmt -x ./... &&
+        test -z $(go fmt ./...)
+
+    - name: Lint
+      run: golint -set_exit_status ./...
