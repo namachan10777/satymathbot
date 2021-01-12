@@ -1,4 +1,7 @@
 # satymathbot
+
+![Test](https://github.com/namachan10777/satymathbot/workflows/Test/badge.svg)
+
 Receieves math expression via HTTP,
 renders it with [SATySFi](https://github.com/gfngfn/SATySFi),
 and returns png.
