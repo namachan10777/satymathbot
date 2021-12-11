@@ -1,5 +1,8 @@
+use std::net::SocketAddr;
+
+use axum::routing;
 use clap::StructOpt;
-use tracing::info;
+use tracing::{error, info};
 
 #[derive(clap::Parser)]
 #[clap(about, version, author)]
@@ -23,4 +26,13 @@ async fn main() {
         "Start {}, {}, {}",
         opts.satysfi_bin, style_file, opts.workdir
     );
+    let app = axum::Router::new().route("/", routing::get(satymathbot::endpoint));
+    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
+    info!("Listen on {}", addr);
+    if let Err(e) = axum::Server::bind(&addr)
+        .serve(app.into_make_service())
+        .await
+    {
+        error!("Server exited accidently: {:?}", e);
+    }
 }
