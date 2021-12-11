@@ -1,8 +1,6 @@
 use axum::extract::Extension;
 use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
-use image::io::Reader as ImageReader;
-use image::DynamicImage;
 use std::sync::Arc;
 use tokio::io::AsyncReadExt;
 use tokio::sync::RwLock;
@@ -10,7 +8,7 @@ use tokio::{fs, io};
 use tracing::{debug, warn};
 
 pub struct State {
-    image: RwLock<Option<DynamicImage>>,
+    image: RwLock<Option<Vec<u8>>>,
 }
 
 impl Default for State {
@@ -24,8 +22,6 @@ impl Default for State {
 #[derive(Debug)]
 enum Error {
     Read(io::Error),
-    Decode(image::error::ImageError),
-    Encode(image::error::ImageError),
 }
 
 async fn handle(state: Arc<State>) -> Result<Vec<u8>, Error> {
@@ -35,20 +31,9 @@ async fn handle(state: Arc<State>) -> Result<Vec<u8>, Error> {
         let mut buf = Vec::new();
         let mut reader = io::BufReader::new(file);
         reader.read_to_end(&mut buf).await.map_err(Error::Read)?;
-        let img = ImageReader::new(std::io::Cursor::new(buf))
-            .decode()
-            .map_err(Error::Decode)?;
-        *state.image.write().await = Some(img);
+        *state.image.write().await = Some(buf);
     }
-    let mut buf = Vec::new();
-    state
-        .image
-        .read()
-        .await
-        .as_ref()
-        .unwrap()
-        .write_to(&mut buf, image::ImageFormat::Png)
-        .map_err(Error::Encode)?;
+    let buf = state.image.read().await.as_ref().unwrap().clone();
     Ok(buf)
 }
 
