@@ -16,6 +16,8 @@ struct Parser {
     satysfi_bin: String,
     #[clap(short = 'p', long)]
     pdftoppn_bin: String,
+    #[clap(short, long, default_value = "10000")]
+    capacity: usize,
 }
 
 #[tokio::main]
@@ -30,6 +32,7 @@ async fn main() {
         opts.workdir.clone(),
         opts.satysfi_bin,
         opts.pdftoppn_bin,
+        10000
     ));
     if let Err(e) = satymathbot::prepare(&opts.style_file, &opts.workdir).await {
         error!("Cannot prepare environment due to {:?}", e);

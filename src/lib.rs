@@ -3,12 +3,11 @@ use axum::extract::{Extension, Query};
 use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
 use image::{DynamicImage, GenericImageView, Pixel};
-use std::collections::HashMap;
 use std::process::ExitStatus;
 use std::string;
 use std::sync::Arc;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::sync::RwLock;
+use tokio::sync::Mutex;
 use tokio::{fs, io, process};
 use tracing::warn;
 
@@ -31,14 +30,14 @@ pub struct Config {
 }
 
 pub struct State {
-    math: RwLock<HashMap<String, MathState>>,
+    math: Mutex<lru::LruCache<String, MathState>>,
     cfg: Config,
 }
 
 impl State {
-    pub fn new(workdir: String, satysfi: String, pdftoppm: String) -> Self {
+    pub fn new(workdir: String, satysfi: String, pdftoppm: String, cache_capacity: usize) -> Self {
         Self {
-            math: RwLock::new(HashMap::new()),
+            math: Mutex::new(lru::LruCache::new(cache_capacity)),
             cfg: Config {
                 workdir,
                 satysfi,
@@ -116,7 +115,7 @@ async fn handle(state: Arc<State>, base64_math: String) -> Result<MathState, Err
         .map_err(|e| Error::BadRequest(BadRequest::Base64(e)))?;
     let math = String::from_utf8(math).map_err(|e| Error::BadRequest(BadRequest::NoUnicode(e)))?;
     if let Some(result) = {
-        let lock = state.math.read().await;
+        let mut lock = state.math.lock().await;
         let inner = lock.get(&base64_math).cloned();
         drop(lock);
         inner
@@ -150,9 +149,9 @@ async fn handle(state: Arc<State>, base64_math: String) -> Result<MathState, Err
                 MathState::Error(String::from_utf8_lossy(&satysfi_result.stdout).to_string());
             state
                 .math
-                .write()
+                .lock()
                 .await
-                .insert(base64_math.clone(), result.clone());
+                .put(base64_math.clone(), result.clone());
             return Ok(result);
         }
         let pdftoppm_result = process::Command::new(&state.cfg.pdftoppm)
@@ -189,7 +188,7 @@ async fn handle(state: Arc<State>, base64_math: String) -> Result<MathState, Err
             .write_to(&mut image_buf, image::ImageOutputFormat::Png)
             .map_err(|e| Error::Internal(InternalError::EncodePng(e)))?;
         let result = MathState::Ready(image_buf);
-        state.math.write().await.insert(base64_math, result.clone());
+        state.math.lock().await.put(base64_math, result.clone());
         Ok(result)
     }
 }
