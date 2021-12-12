@@ -14,9 +14,7 @@ use tracing::warn;
 
 #[derive(Debug, PartialEq, Clone)]
 enum MathState {
-    #[allow(dead_code)]
     Error(String),
-    #[allow(dead_code)]
     Ready(Vec<u8>),
 }
 
