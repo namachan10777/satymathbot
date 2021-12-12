@@ -1,40 +1,39 @@
 name: Test
-
 on: [push, pull_request]
 jobs:
-
-  build:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
-
-    - name: Set up Go
-      uses: actions/setup-go@v2
+    - uses: actions/cache@v2
       with:
-        go-version: 1.15
-
-    - name: Install golint
-      run: go get golang.org/x/lint/golint
-
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: cargo-v1-${{ hashFiles('**/Cargo.lock') }}
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+        components: rustfmt, clippy
     - name: Build
-      run: go build -v ./...
-
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --verbose
     - name: Test
-      run: go test -v ./...
-
-    - name: Vet
-      run: go vet ./...
-
-    - name: Fmt
-      run:
-        go fmt -x ./... &&
-        test -z $(go fmt ./...)
-
-    - name: Lint
-      run: golint -set_exit_status ./...
-
-    - name: Hadolint
-      run: |
-          wget https://github.com/hadolint/hadolint/releases/download/v1.19.0/hadolint-Linux-x86_64 -O ./hadolint &&
-          chmod +x ./hadolint &&
-          ./hadolint dockerfile/prod/Dockerfile
+      uses: actions-rs/cargo@v1
+      with:
+        command: test
+        args: --verbose
+    - name: Format
+      uses: actions-rs/cargo@v1
+      with:
+        command: fmt
+        args: -- --check
+    - name: Clippy
+      uses: actions-rs/clippy-check@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        args: -- -D warnings
