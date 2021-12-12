@@ -2,7 +2,7 @@ use askama::Template;
 use axum::extract::{Extension, Query};
 use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
-use image::{GenericImageView, Pixel};
+use image::{DynamicImage, GenericImageView, Pixel};
 use std::collections::HashMap;
 use std::process::ExitStatus;
 use std::string;
@@ -62,6 +62,7 @@ enum InternalError {
     ReadPng(io::Error),
     DecodePng(image::ImageError),
     EncodePng(image::ImageError),
+    MathUndetected,
 }
 
 #[derive(Debug)]
@@ -74,6 +75,42 @@ enum BadRequest {
 enum Error {
     BadRequest(BadRequest),
     Internal(InternalError),
+}
+
+struct Area {
+    x: u32,
+    y: u32,
+    w: u32,
+    h: u32,
+}
+
+fn detect_rendered_area(image: &DynamicImage) -> Option<Area> {
+    let mut min_x = std::u32::MAX;
+    let mut max_x = std::u32::MIN;
+    let mut min_y = std::u32::MAX;
+    let mut max_y = std::u32::MIN;
+    let (w, h) = image.dimensions();
+    for x in 0..w {
+        for y in 0..h {
+            let r = image.get_pixel(x, y).to_rgb().channels4().0;
+            if r < 240 {
+                min_x = min_x.min(x);
+                max_x = max_x.max(x);
+                min_y = min_y.min(y);
+                max_y = max_y.max(y);
+            }
+        }
+    }
+    if max_x > min_x && max_y > min_y {
+        Some(Area {
+            x: min_x,
+            y: min_y,
+            w: max_x - min_x,
+            h: max_y - min_y,
+        })
+    } else {
+        None
+    }
 }
 
 async fn handle(state: Arc<State>, base64_math: String) -> Result<MathState, Error> {
@@ -146,25 +183,9 @@ async fn handle(state: Arc<State>, base64_math: String) -> Result<MathState, Err
             .unwrap()
             .decode()
             .map_err(|e| Error::Internal(InternalError::DecodePng(e)))?;
-        let mut min_x = std::u32::MAX;
-        let mut max_x = std::u32::MIN;
-        let mut min_y = std::u32::MAX;
-        let mut max_y = std::u32::MIN;
-        let (w, h) = image.dimensions();
-        for x in 0..w {
-            for y in 0..h {
-                let pixel = image.get_pixel(x, y);
-                let ch = pixel.channels();
-                if (ch[0] as u16) + (ch[1] as u16) + (ch[2] as u16) < 30 {
-                    min_x = min_x.min(x);
-                    max_x = max_x.max(x);
-                    min_y = min_y.min(y);
-                    max_y = max_y.max(y);
-                }
-            }
-        }
-        dbg!(min_x, max_x, min_y, max_y);
-        let image = image.crop_imm(min_x, min_y, max_x - min_x, max_y - min_y);
+        let area =
+            detect_rendered_area(&image).ok_or(Error::Internal(InternalError::MathUndetected))?;
+        let image = image.crop_imm(area.x, area.y, area.w, area.h);
         let mut image_buf = Vec::new();
         image
             .write_to(&mut image_buf, image::ImageOutputFormat::Png)
