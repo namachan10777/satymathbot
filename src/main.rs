@@ -33,11 +33,10 @@ async fn main() {
     ));
     if let Err(e) = satymathbot::prepare(&opts.style_file, &opts.workdir).await {
         error!("Cannot prepare environment due to {:?}", e);
-    }
-    else {
+    } else {
         info!("Prepared environment")
     }
-    
+
     let app = axum::Router::new()
         .route("/", routing::get(satymathbot::endpoint))
         .layer(axum::AddExtensionLayer::new(state));
