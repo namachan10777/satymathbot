@@ -3,7 +3,7 @@
 @require: math
 @require: code
 
-module StdJa : sig
+module Empty : sig
   val document : math -> document
 end = struct
   let font-ratio-latin = 1.
@@ -50,5 +50,5 @@ end = struct
 end
 
 
-let document = StdJa.document
+let document = Empty.document
   % ad-hoc

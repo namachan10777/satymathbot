@@ -1,4 +1,5 @@
-SATYSFI_PATH=/usr/local/bin/satysfi
+SATYSFI_PATH=$(shell which satysfi)
+PDFTOPPM_PATH=$(shell which pdftoppm)
 WORKDIR=/tmp/satymathbot
 SATYH_PATH=satysfi/satyh
 
@@ -7,4 +8,4 @@ test.png: src/main.rs
 
 .PHONY: dev
 dev: test.png
-	cargo watch -x 'run -- -b $(SATYH_PATH) -w $(WORKDIR) -s $(SATYH_PATH)'
+	cargo watch -x 'run -- -b $(SATYSFI_PATH) -w $(WORKDIR) -s $(SATYH_PATH) -p $(PDFTOPPM_PATH)'

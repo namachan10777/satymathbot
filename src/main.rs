@@ -14,6 +14,8 @@ struct Parser {
     style_file: Option<String>,
     #[clap(short = 'b', long)]
     satysfi_bin: String,
+    #[clap(short = 'p', long)]
+    pdftoppn_bin: String,
 }
 
 #[tokio::main]
@@ -27,7 +29,12 @@ async fn main() {
         "Start {}, {}, {}",
         opts.satysfi_bin, style_file, opts.workdir
     );
-    let state = Arc::new(satymathbot::State::default());
+    let state = Arc::new(satymathbot::State::new(
+        opts.workdir,
+        opts.satysfi_bin,
+        style_file,
+        opts.pdftoppn_bin,
+    ));
     let app = axum::Router::new()
         .route("/", routing::get(satymathbot::endpoint))
         .layer(axum::AddExtensionLayer::new(state));
