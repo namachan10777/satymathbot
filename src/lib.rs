@@ -20,29 +20,31 @@ enum MathState {
 }
 
 #[derive(askama::Template)]
-#[template(path = "saty.jinja")]
+#[template(path = "saty.jinja", escape = "none")]
 struct SatyTemplate {
-    satyh: String,
     math: String,
+}
+
+pub struct Config {
+    workdir: String,
+    satysfi: String,
+    pdftoppm: String,
 }
 
 pub struct State {
     math: RwLock<HashMap<String, MathState>>,
-    workdir: String,
-    satysfi: String,
-    #[allow(dead_code)]
-    pdftoppm: String,
-    satyh: String,
+    cfg: Config,
 }
 
 impl State {
-    pub fn new(workdir: String, satysfi: String, satyh: String, pdftoppm: String) -> Self {
+    pub fn new(workdir: String, satysfi: String, pdftoppm: String) -> Self {
         Self {
             math: RwLock::new(HashMap::new()),
-            workdir,
-            satysfi,
-            satyh,
-            pdftoppm,
+            cfg: Config {
+                workdir,
+                satysfi,
+                pdftoppm,
+            },
         }
     }
 }
@@ -75,26 +77,29 @@ async fn handle(state: Arc<State>, base64_math: String) -> Result<MathState, Err
     let math = base64::decode_config(&base64_math, base64::URL_SAFE)
         .map_err(|e| Error::BadRequest(BadRequest::Base64(e)))?;
     let math = String::from_utf8(math).map_err(|e| Error::BadRequest(BadRequest::NoUnicode(e)))?;
-    if let Some(result) = { state.math.read().await.get(&math).cloned() } {
+    if let Some(result) = {
+        let lock = state.math.read().await;
+        let inner = lock.get(&base64_math).cloned();
+        drop(lock);
+        inner
+    } {
         Ok(result)
     } else {
-        let saty_path = format!("{}/{}.saty", state.workdir, base64_math);
-        let pdf_path = format!("{}/{}.pdf", state.workdir, base64_math);
-        let png_path = format!("{}/{}.png", state.workdir, base64_math);
+        let saty_path = format!("{}/{}.saty", state.cfg.workdir, base64_math);
+        let pdf_path = format!("{}/{}.pdf", state.cfg.workdir, base64_math);
+        let pdtfoppm_target = format!("{}/{}", state.cfg.workdir, base64_math);
+        let png_path = format!("{}/{}-1.png", state.cfg.workdir, base64_math);
         let mut file = fs::File::create(&saty_path)
             .await
             .map_err(|e| Error::Internal(InternalError::CreateFile(e)))?;
-        let template = SatyTemplate {
-            math,
-            satyh: state.satyh.clone(),
-        };
+        let template = SatyTemplate { math };
         let rendered = template
             .render()
             .map_err(|e| Error::Internal(InternalError::Template(e)))?;
         file.write_all(rendered.as_bytes())
             .await
             .map_err(|e| Error::Internal(InternalError::WriteFile(e)))?;
-        let satysfi_result = process::Command::new(&state.satysfi)
+        let satysfi_result = process::Command::new(&state.cfg.satysfi)
             .arg(&saty_path)
             .arg("-o")
             .arg(&pdf_path)
@@ -104,7 +109,7 @@ async fn handle(state: Arc<State>, base64_math: String) -> Result<MathState, Err
 
         if !satysfi_result.status.success() {
             let result =
-                MathState::Error(String::from_utf8_lossy(&satysfi_result.stderr).to_string());
+                MathState::Error(String::from_utf8_lossy(&satysfi_result.stdout).to_string());
             state
                 .math
                 .write()
@@ -112,10 +117,10 @@ async fn handle(state: Arc<State>, base64_math: String) -> Result<MathState, Err
                 .insert(base64_math.clone(), result.clone());
             return Ok(result);
         }
-        let pdftoppm_result = process::Command::new(&state.pdftoppm)
+        let pdftoppm_result = process::Command::new(&state.cfg.pdftoppm)
             .arg("-png")
-            .arg(&png_path)
             .arg(&pdf_path)
+            .arg(&pdtfoppm_target)
             .output()
             .await
             .map_err(|e| Error::Internal(InternalError::SpawnPdftoppm(e)))?;
@@ -137,6 +142,11 @@ async fn handle(state: Arc<State>, base64_math: String) -> Result<MathState, Err
         state.math.write().await.insert(base64_math, result.clone());
         Ok(result)
     }
+}
+
+pub async fn prepare(style_file: &str, workdir: &str) -> io::Result<()> {
+    let to = format!("{}/empty.satyh", workdir);
+    fs::copy(style_file, to).await.map(|_| ())
 }
 
 #[derive(serde::Deserialize)]

@@ -1,7 +1,7 @@
 SATYSFI_PATH=$(shell which satysfi)
 PDFTOPPM_PATH=$(shell which pdftoppm)
 WORKDIR=/tmp/satymathbot
-SATYH_PATH=satysfi/satyh
+SATYH_PATH=satysfi/empty.satyh
 
 test.png: src/main.rs
 	silicon $< -o $@

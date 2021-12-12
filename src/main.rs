@@ -11,7 +11,7 @@ struct Parser {
     #[clap(short, long)]
     workdir: String,
     #[clap(short = 's', long)]
-    style_file: Option<String>,
+    style_file: String,
     #[clap(short = 'b', long)]
     satysfi_bin: String,
     #[clap(short = 'p', long)]
@@ -22,19 +22,22 @@ struct Parser {
 async fn main() {
     tracing_subscriber::fmt::init();
     let opts = Parser::parse();
-    let style_file = opts
-        .style_file
-        .unwrap_or_else(|| format!("{}/satymathbot.satyh", opts.workdir));
     info!(
         "Start {}, {}, {}",
-        opts.satysfi_bin, style_file, opts.workdir
+        opts.satysfi_bin, opts.style_file, opts.workdir
     );
     let state = Arc::new(satymathbot::State::new(
-        opts.workdir,
+        opts.workdir.clone(),
         opts.satysfi_bin,
-        style_file,
         opts.pdftoppn_bin,
     ));
+    if let Err(e) = satymathbot::prepare(&opts.style_file, &opts.workdir).await {
+        error!("Cannot prepare environment due to {:?}", e);
+    }
+    else {
+        info!("Prepared environment")
+    }
+    
     let app = axum::Router::new()
         .route("/", routing::get(satymathbot::endpoint))
         .layer(axum::AddExtensionLayer::new(state));
