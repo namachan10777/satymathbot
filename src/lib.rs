@@ -2,6 +2,7 @@ use askama::Template;
 use axum::extract::{Extension, Query};
 use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
+use image::{GenericImageView, Pixel};
 use std::collections::HashMap;
 use std::process::ExitStatus;
 use std::string;
@@ -59,6 +60,8 @@ enum InternalError {
     ExecutePdftoppm(ExitStatus, String),
     OpenPng(io::Error),
     ReadPng(io::Error),
+    DecodePng(image::ImageError),
+    EncodePng(image::ImageError),
 }
 
 #[derive(Debug)]
@@ -138,7 +141,35 @@ async fn handle(state: Arc<State>, base64_math: String) -> Result<MathState, Err
             .read_to_end(&mut buf)
             .await
             .map_err(|e| Error::Internal(InternalError::ReadPng(e)))?;
-        let result = MathState::Ready(buf);
+        let image = image::io::Reader::new(std::io::Cursor::new(buf))
+            .with_guessed_format()
+            .unwrap()
+            .decode()
+            .map_err(|e| Error::Internal(InternalError::DecodePng(e)))?;
+        let mut min_x = std::u32::MAX;
+        let mut max_x = std::u32::MIN;
+        let mut min_y = std::u32::MAX;
+        let mut max_y = std::u32::MIN;
+        let (w, h) = image.dimensions();
+        for x in 0..w {
+            for y in 0..h {
+                let pixel = image.get_pixel(x, y);
+                let ch = pixel.channels();
+                if (ch[0] as u16) + (ch[1] as u16) + (ch[2] as u16) < 30 {
+                    min_x = min_x.min(x);
+                    max_x = max_x.max(x);
+                    min_y = min_y.min(y);
+                    max_y = max_y.max(y);
+                }
+            }
+        }
+        dbg!(min_x, max_x, min_y, max_y);
+        let image = image.crop_imm(min_x, min_y, max_x - min_x, max_y - min_y);
+        let mut image_buf = Vec::new();
+        image
+            .write_to(&mut image_buf, image::ImageOutputFormat::Png)
+            .map_err(|e| Error::Internal(InternalError::EncodePng(e)))?;
+        let result = MathState::Ready(image_buf);
         state.math.write().await.insert(base64_math, result.clone());
         Ok(result)
     }
