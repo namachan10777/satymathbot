@@ -1,0 +1,7 @@
+version: '3.0'
+services:
+  app:
+    build:
+      dockerfile: ./dockerfile/app/Dockerfile
+      context: .
+
