@@ -20,6 +20,24 @@ struct Parser {
     capacity: usize,
 }
 
+pub async fn shutdown_signal() {
+    use std::io;
+    use tokio::signal::unix::SignalKind;
+
+    async fn terminate() -> io::Result<()> {
+        tokio::signal::unix::signal(SignalKind::terminate())?
+            .recv()
+            .await;
+        Ok(())
+    }
+
+    tokio::select! {
+        _ = terminate() => {},
+        _ = tokio::signal::ctrl_c() => {},
+    }
+    info!("signal received, starting graceful shutdown")
+}
+
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
@@ -32,7 +50,7 @@ async fn main() {
         opts.workdir.clone(),
         opts.satysfi_bin,
         opts.pdftoppn_bin,
-        10000
+        10000,
     ));
     if let Err(e) = satymathbot::prepare(&opts.style_file, &opts.workdir).await {
         error!("Cannot prepare environment due to {:?}", e);
@@ -47,6 +65,7 @@ async fn main() {
     info!("Listen on {}", addr);
     if let Err(e) = axum::Server::bind(&addr)
         .serve(app.into_make_service())
+        .with_graceful_shutdown(shutdown_signal())
         .await
     {
         error!("Server exited accidently: {:?}", e);
