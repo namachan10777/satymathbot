@@ -4,4 +4,9 @@ services:
     build:
       dockerfile: ./dockerfile/app/Dockerfile
       context: .
-
+  rproxy:
+    build:
+      dockerfile: Dockerfile
+      context: ./dockerfile/rproxy
+    ports:
+      - 8080:80
