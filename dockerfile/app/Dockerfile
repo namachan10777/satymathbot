@@ -18,7 +18,7 @@ RUN opam repository add satysfi-external https://github.com/gfngfn/satysfi-exter
 RUN opam repository add satyrographos https://github.com/na4zagin3/satyrographos-repo.git
 RUN opam update
 RUN opam install -y satysfi satysfi-dist satyrographos
-RUN satyrographos install
+RUN opam exec -- satyrographos install
 
 FROM rust:slim-buster as satymathbot-builder
 WORKDIR /work
@@ -33,10 +33,11 @@ RUN apt-get update && apt-get install -y poppler-utils libjpeg-dev
 COPY ./satysfi/empty.satyh /etc/satymathbot/empty.satyh
 COPY --from=satysfi-builder /home/opam/.opam/4.10.0/bin/satysfi /usr/local/bin/satysfi
 COPY --from=satymathbot-builder /work/target/release/satymathbot /usr/local/bin/satymathbot
-RUN mkdir /tmp/satymathbot
 RUN useradd -rm -d /home/satymathbot -s /bin/bash -u 1000 satymathbot
 USER satymathbot
+RUN mkdir /tmp/satymathbot
 COPY --from=satysfi-builder /home/opam/.satysfi /home/satymathbot/.satysfi
+COPY --from=satysfi-builder /home/opam /home/opam
 
 ENTRYPOINT [ "/usr/local/bin/satymathbot" ]
 CMD [ "-b", "/usr/local/bin/satysfi", "-s", "/etc/satymathbot/empty.satyh", "-p", "/usr/bin/pdftoppm", "-w", "/tmp/satymathbot" ]
