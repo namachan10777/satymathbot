@@ -22,3 +22,7 @@
 test.png
 
 docker-compose-*.yml
+
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+
