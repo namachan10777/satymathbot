@@ -35,5 +35,5 @@ static_resources:
         - endpoint:
             address:
               socket_address:
-                address: rproxy
+                address: nginx
                 port_value: 80

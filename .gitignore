@@ -20,3 +20,5 @@
 /target
 
 test.png
+
+docker-compose-*.yml
