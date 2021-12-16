@@ -29,8 +29,8 @@ test: docker-compose-validate.yml
 	cargo test
 	docker-compose -f $< down
 	docker-compose -f $< up --build -d
-	docker-compose -f $< exec nginx nginx -t
-	docker-compose -f $< exec envoy /usr/local/bin/envoy --mode validate --config-path /etc/envoy/envoy.yml
+	docker-compose -f $< exec -T nginx nginx -t
+	docker-compose -f $< exec -T envoy /usr/local/bin/envoy --mode validate --config-path /etc/envoy/envoy.yml
 	docker-compose -f $< down
 
 .PHONY: clean
