@@ -13,6 +13,9 @@ docker-compose-core.yml: docker-compose/core.jsonnet docker-compose/core-service
 docker-compose-metrics.yml: docker-compose/metrics.jsonnet docker-compose/core-services.libsonnet
 	jsonnet $< > $@
 
+docker-compose-validate.yml: docker-compose/validate.jsonnet docker-compose/core-services.libsonnet
+	jsonnet $< > $@
+
 .PHONY: docker-compose-core
 docker-compose-core: docker-compose-core.yml
 	docker-compose -f $< up --build
@@ -22,7 +25,7 @@ docker-compose-metrics: docker-compose-metrics.yml
 	docker-compose -f $< up --build
 
 .PHONY: test
-test: docker-compose-core.yml
+test: docker-compose-validate.yml
 	cargo test
 	docker-compose -f $< down
 	docker-compose -f $< up --build -d
