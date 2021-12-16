@@ -1,5 +1,5 @@
 use askama::Template;
-use axum::extract::{Extension, Query};
+use axum::extract::{Extension, Path};
 use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
 use image::{DynamicImage, GenericImageView, Pixel};
@@ -110,13 +110,14 @@ fn detect_rendered_area(image: &DynamicImage) -> Option<Area> {
     }
 }
 
-async fn handle(state: Arc<State>, base64_math: String) -> Result<MathState, Error> {
+async fn handle(state: Arc<State>, query: Query) -> Result<MathState, Error> {
+    let base64_math = query.base64();
     let math = base64::decode_config(&base64_math, base64::URL_SAFE)
         .map_err(|e| Error::BadRequest(BadRequest::Base64(e)))?;
     let math = String::from_utf8(math).map_err(|e| Error::BadRequest(BadRequest::NoUnicode(e)))?;
     if let Some(result) = {
         let mut lock = state.math.lock().await;
-        let inner = lock.get(&base64_math).cloned();
+        let inner = lock.get(base64_math).cloned();
         drop(lock);
         inner
     } {
@@ -151,7 +152,7 @@ async fn handle(state: Arc<State>, base64_math: String) -> Result<MathState, Err
                 .math
                 .lock()
                 .await
-                .put(base64_math.clone(), result.clone());
+                .put(base64_math.to_owned(), result.clone());
             return Ok(result);
         }
         let pdftoppm_result = process::Command::new(&state.cfg.pdftoppm)
@@ -188,7 +189,11 @@ async fn handle(state: Arc<State>, base64_math: String) -> Result<MathState, Err
             .write_to(&mut image_buf, image::ImageOutputFormat::Png)
             .map_err(|e| Error::Internal(InternalError::EncodePng(e)))?;
         let result = MathState::Ready(image_buf);
-        state.math.lock().await.put(base64_math, result.clone());
+        state
+            .math
+            .lock()
+            .await
+            .put(base64_math.to_owned(), result.clone());
         Ok(result)
     }
 }
@@ -198,16 +203,35 @@ pub async fn prepare(style_file: &str, workdir: &str) -> io::Result<()> {
     fs::copy(style_file, to).await.map(|_| ())
 }
 
-#[derive(serde::Deserialize)]
-pub struct Params {
-    math: String,
+enum Query {
+    Png(String),
+}
+
+impl Query {
+    fn base64(&self) -> &str {
+        match self {
+            Query::Png(inner) => inner.as_str(),
+        }
+    }
 }
 
 pub async fn endpoint(
     Extension(state): Extension<Arc<State>>,
-    Query(params): Query<Params>,
+    Path(file_name): Path<String>,
 ) -> impl IntoResponse {
-    match handle(state, params.math).await {
+    let query = match file_name.rsplit_once('.') {
+        Some((base64, "png")) => Query::Png(base64.to_owned()),
+        _ => {
+            let mut headers = HeaderMap::new();
+            headers.append("Content-Type", HeaderValue::from_static("text/plain"));
+            return (
+                StatusCode::BAD_REQUEST,
+                headers,
+                "filename with unsupported extension".as_bytes().to_vec(),
+            );
+        }
+    };
+    match handle(state, query).await {
         Ok(MathState::Ready(img)) => {
             let mut headers = HeaderMap::new();
             headers.append("Content-Type", HeaderValue::from_static("image/png"));
