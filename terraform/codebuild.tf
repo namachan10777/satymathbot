@@ -24,7 +24,6 @@ data "aws_iam_policy_document" "codebuild" {
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
       "logs:PutLogEvents",
-      "logs:GetLogEvents",
     ]
   }
 }
@@ -88,6 +87,13 @@ data "aws_iam_policy_document" "github-actions" {
       "logs:GetLogEvents"
     ]
     resources = [aws_codebuild_project.satymathbot.arn]
+  }
+  statement {
+    resources = ["*"]
+    effect    = "Allow"
+    actions = [
+      "logs:GetLogEvents",
+    ]
   }
 }
 
