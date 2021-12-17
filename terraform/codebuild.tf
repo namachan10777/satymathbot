@@ -30,3 +30,37 @@ resource "aws_codebuild_project" "satymathbot" {
     buildspec = file("buildspec.yml")
   }
 }
+
+module "oidc-provider-data" {
+  source     = "reegnz/oidc-provider-data/aws"
+  version    = "0.0.3"
+  issuer_url = "https://token.actions.githubusercontent.com"
+}
+
+data "aws_iam_policy_document" "github-actions-assume-role" {
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "Federated"
+      identifiers = ["${module.oidc-provider-data.arn}"]
+    }
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+  }
+}
+
+data "aws_iam_policy_document" "github-actions-policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "codebuild:StartBuild",
+      "codebuild:BatchGetBuilds",
+      "logs:GetLogEvents"
+    ]
+    resources = [aws_codebuild_project.satymathbot.arn]
+  }
+}
+
+resource "aws_iam_role" "github-actions" {
+  name               = "SatymathBotGitHubActions"
+  assume_role_policy = data.aws_iam_policy_document.github-actions-assume-role.json
+}
