@@ -45,10 +45,16 @@ data "aws_iam_policy_document" "github-actions-assume-role" {
       identifiers = ["${module.oidc-provider-data.arn}"]
     }
     actions = ["sts:AssumeRoleWithWebIdentity"]
+    
+    condition {
+      test = "StringLike"
+      variable = "token.actions.githubusercontent.com:sub"
+      values = ["repo:namachan10777/satymathbot:*"]
+    }
   }
 }
 
-data "aws_iam_policy_document" "github-actions-policy" {
+data "aws_iam_policy_document" "github-actions" {
   statement {
     effect = "Allow"
     actions = [
@@ -63,4 +69,10 @@ data "aws_iam_policy_document" "github-actions-policy" {
 resource "aws_iam_role" "github-actions" {
   name               = "SatymathBotGitHubActions"
   assume_role_policy = data.aws_iam_policy_document.github-actions-assume-role.json
+}
+
+resource "aws_iam_role_policy" "github-actions" {
+  name = "SatymathBotGitHubActions"
+  role = aws_iam_role.github-actions.name
+  policy = data.aws_iam_policy_document.github-actions.json
 }
