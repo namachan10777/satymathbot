@@ -41,9 +41,10 @@ resource "aws_codebuild_project" "satymathbot" {
     type = "NO_ARTIFACTS"
   }
   environment {
-    compute_type = "BUILD_GENERAL1_SMALL"
-    image        = "aws/codebuild/amazonlinux2-aarch64-standard:2.0"
-    type         = "ARM_CONTAINER"
+    compute_type    = "BUILD_GENERAL1_SMALL"
+    image           = "aws/codebuild/amazonlinux2-aarch64-standard:2.0"
+    type            = "ARM_CONTAINER"
+    privileged_mode = true
   }
   source {
     type      = "NO_SOURCE"
