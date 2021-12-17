@@ -14,6 +14,27 @@ resource "aws_iam_role" "CodeBuildSatymathbot" {
   assume_role_policy = data.aws_iam_policy_document.codebuild-assume-role.json
 }
 
+data "aws_iam_policy_document" "codebuild" {
+  statement {
+    resources = [
+      "*"
+    ]
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:GetLogEvents",
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "codebuild" {
+  name   = "CodeBuildSatymathbot"
+  policy = data.aws_iam_policy_document.codebuild.json
+  role   = aws_iam_role.CodeBuildSatymathbot.name
+}
+
 resource "aws_codebuild_project" "satymathbot" {
   name         = "satymathbot"
   service_role = aws_iam_role.CodeBuildSatymathbot.arn
@@ -67,13 +88,6 @@ data "aws_iam_policy_document" "github-actions" {
       "logs:GetLogEvents"
     ]
     resources = [aws_codebuild_project.satymathbot.arn]
-  }
-  statement {
-    resources = [
-      "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.self.account_id}:log-group:/aws/codebuild/satymathbot:*",
-    ]
-    effect  = "Allow"
-    actions = ["logs:CreateGroup", "logs:CreateStream"]
   }
 }
 
