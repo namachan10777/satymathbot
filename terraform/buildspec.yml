@@ -1,8 +1,9 @@
 version: 0.2
 env:
-  REPO_APP: 966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-app
-  REPO_NGINX: 966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-nginx
-  REPO_ENVOY: 966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-envoy
+  variables:
+    REPO_APP: 966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-app
+    REPO_NGINX: 966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-nginx
+    REPO_ENVOY: 966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-envoy
 phases:
   pre_build:
     commands:
