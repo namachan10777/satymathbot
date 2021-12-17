@@ -1,8 +1,9 @@
 use std::net::SocketAddr;
 use std::sync::Arc;
 
-use axum::routing;
+use axum::{response::IntoResponse, routing, Json};
 use clap::StructOpt;
+use serde::Serialize;
 use tracing::{error, info};
 
 #[derive(clap::Parser)]
@@ -38,6 +39,22 @@ pub async fn shutdown_signal() {
     info!("signal received, starting graceful shutdown")
 }
 
+#[derive(Serialize)]
+enum HealthStatus {
+    Ok,
+}
+
+#[derive(Serialize)]
+struct HealthResponse {
+    status: HealthStatus,
+}
+
+async fn health() -> impl IntoResponse {
+    Json(HealthResponse {
+        status: HealthStatus::Ok,
+    })
+}
+
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
@@ -60,6 +77,7 @@ async fn main() {
 
     let app = axum::Router::new()
         .route("/:file", routing::get(satymathbot::endpoint))
+        .route("/health", routing::get(health))
         .layer(axum::AddExtensionLayer::new(state));
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
     info!("Listen on {}", addr);
