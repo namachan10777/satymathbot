@@ -24,6 +24,7 @@ data "aws_iam_policy_document" "codebuild" {
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
       "logs:PutLogEvents",
+      "ecr:GetAuthorizationToken",
     ]
   }
 }
