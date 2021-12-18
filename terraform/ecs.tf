@@ -24,6 +24,14 @@ resource "aws_security_group" "alb" {
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
 }
 
 resource "aws_alb" "main" {
@@ -45,8 +53,8 @@ resource "aws_lb_target_group" "main" {
   health_check {
     port     = 80
     path     = "/"
-    timeout  = 40
-    interval = 60
+    timeout  = 10
+    interval = 30
   }
 }
 
@@ -97,7 +105,7 @@ data "aws_iam_policy_document" "ecs-execution-assume-role" {
 
 resource "aws_iam_role" "ecs-execution" {
   name               = "EcsTaskExecution"
-  assume_role_policy = data.aws_iam_policy_document.ecs-assume-role.json
+  assume_role_policy = data.aws_iam_policy_document.ecs-execution-assume-role.json
 }
 
 data "aws_iam_policy" "amazon-ecs-task-execution-role-policy" {
