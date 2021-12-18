@@ -36,8 +36,9 @@ resource "aws_iam_role_policy" "codebuild" {
 }
 
 resource "aws_codebuild_project" "satymathbot" {
-  name         = "satymathbot"
-  service_role = aws_iam_role.CodeBuildSatymathbot.arn
+  name          = "satymathbot"
+  service_role  = aws_iam_role.CodeBuildSatymathbot.arn
+  build_timeout = 60
   artifacts {
     type = "NO_ARTIFACTS"
   }
