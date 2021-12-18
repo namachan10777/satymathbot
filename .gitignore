@@ -25,4 +25,5 @@ docker-compose-*.yml
 
 terraform/.terraform/
 terraform/.terraform.lock.hcl
+terraform/*.json
 

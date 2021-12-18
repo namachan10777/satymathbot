@@ -60,3 +60,46 @@ resource "aws_lb_listener" "main" {
     type             = "forward"
   }
 }
+
+resource "aws_security_group" "ecs" {
+  name   = "satymathbot-ecs"
+  vpc_id = data.aws_vpc.default.id
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+}
+
+resource "aws_ecs_cluster" "main" {
+  name = "satymathbot"
+}
+
+resource "aws_ecs_task_definition" "main" {
+  family                   = "satymathbot"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = 256
+  memory                   = 512
+  network_mode             = "awsvpc"
+  container_definitions    = file("definition.json")
+}
+
+resource "aws_ecs_service" "main" {
+  name            = "satymathbot"
+  cluster         = aws_ecs_cluster.main.name
+  launch_type     = "FARGATE"
+  desired_count   = 1
+  task_definition = aws_ecs_task_definition.main.arn
+  network_configuration {
+    subnets          = data.aws_subnet_ids.default.ids
+    security_groups  = [aws_security_group.ecs.id]
+    assign_public_ip = true
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.main.arn
+    container_name   = "nginx"
+    container_port   = 80
+  }
+}
