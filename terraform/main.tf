@@ -11,3 +11,11 @@ terraform {
     encrypt = true
   }
 }
+
+data "aws_vpc" "default" {
+  id = "vpc-0d7220f920a55a2de"
+}
+
+data "aws_subnet_ids" "default" {
+  vpc_id = data.aws_vpc.default.id
+}
