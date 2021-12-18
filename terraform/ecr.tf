@@ -41,19 +41,19 @@ locals {
   repositories = toset(["app", "nginx", "envoy"])
 }
 
-resource "aws_ecr_repository" "satymathbot-app" {
+resource "aws_ecr_repository" "satymathbot" {
   for_each = local.repositories
   name     = "satymathbot-${each.value}"
 }
 
-resource "aws_ecr_repository_policy" "satymathbot-app" {
+resource "aws_ecr_repository_policy" "satymathbot" {
   for_each   = local.repositories
-  repository = "satymathbot-${each.value}"
+  repository = aws_ecr_repository.satymathbot[each.value].name
   policy     = data.aws_iam_policy_document.ecr-policy.json
 }
 
-resource "aws_ecr_lifecycle_policy" "satymathbot-app" {
+resource "aws_ecr_lifecycle_policy" "satymathbot" {
   for_each   = local.repositories
-  repository = "satymathbot-${each.value}"
+  repository = aws_ecr_repository.satymathbot[each.value].name
   policy     = local.ecr-lifecycle-policy
 }
