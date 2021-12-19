@@ -2,8 +2,8 @@ resource "aws_security_group" "ecs" {
   name   = "satymathbot-ecs"
   vpc_id = aws_vpc.main.id
   ingress {
-    from_port        = 80
-    to_port          = 80
+    from_port        = 8080
+    to_port          = 8080
     protocol         = "tcp"
     cidr_blocks      = [for subnet in aws_subnet.public : subnet.cidr_block]
     ipv6_cidr_blocks = [for subnet in aws_subnet.public : subnet.ipv6_cidr_block]
@@ -113,6 +113,6 @@ resource "aws_ecs_service" "main" {
   load_balancer {
     target_group_arn = aws_lb_target_group.main.arn
     container_name   = "envoy"
-    container_port   = 80
+    container_port   = 8080
   }
 }
