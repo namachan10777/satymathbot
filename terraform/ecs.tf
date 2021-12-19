@@ -70,6 +70,10 @@ resource "aws_ecs_task_definition" "main" {
   network_mode             = "awsvpc"
   container_definitions    = file("definition.json")
   execution_role_arn       = aws_iam_role.ecs-execution.arn
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture        = "ARM64"
+  }
 }
 
 data "aws_iam_policy_document" "ecs-assume-role" {
