@@ -32,7 +32,16 @@ data "aws_iam_policy_document" "codebuild" {
     actions = [
       "logs:CreateLogStream",
       "logs:PutLogEvents",
-      "ecr:GetAuthorizationToken",
+    ]
+  }
+
+  statement {
+    resources = [
+      "*"
+    ]
+    effect = "Allow"
+    actions = [
+      "ecr:GetAuthorizationToken"
     ]
   }
 }
