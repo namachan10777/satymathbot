@@ -127,22 +127,3 @@ resource "aws_iam_role_policy" "github-actions" {
   role   = aws_iam_role.github-actions.name
   policy = data.aws_iam_policy_document.github-actions.json
 }
-
-resource "aws_s3_bucket" "cache" {
-  bucket = "satymathbot-ci-cache"
-}
-
-data "aws_iam_policy_document" "cache-access" {
-  statement {
-    effect = "Allow"
-    principals {
-      type        = "AWS"
-      identifiers = [aws_iam_role.CodeBuildSatymathbot.arn]
-    }
-    actions = [
-      "s3:GetObject",
-      "s3:PutObject",
-    ]
-    resources = ["*"]
-  }
-}

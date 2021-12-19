@@ -1,21 +1,11 @@
 FROM 966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-satysfi:latest as satysfi-builder
 FROM rust:slim-buster as satymathbot-builder
-
-ARG AWS_ACCESS_KEY_ID=""
-ARG AWS_SECRET_ACCESS_KEY=""
-ARG AWS_SESSION_TOKEN=""
-
-RUN apt-get update && apt-get install -y awscli zstd
-
 WORKDIR /work
-COPY ./ci /work/ci
 COPY ./src /work/src
 COPY ./templates /work/templates
 COPY ./Cargo.toml /work/Cargo.toml
 COPY ./Cargo.lock /work/Cargo.lock
-RUN bash ci/prepare_cache.sh
 RUN cargo build --release
-RUN bash ci/upload_cache.sh
 
 FROM public.ecr.aws/debian/debian:buster-slim
 RUN apt-get update && apt-get install -y poppler-utils libjpeg-dev
