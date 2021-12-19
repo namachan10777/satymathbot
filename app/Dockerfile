@@ -5,6 +5,8 @@ ARG AWS_ACCESS_KEY_ID=""
 ARG AWS_SECRET_ACCESS_KEY=""
 ARG AWS_SESSION_TOKEN=""
 
+RUN apt-get update && apt-get install -y awscli zstd
+
 WORKDIR /work
 COPY ./ci /work/ci
 COPY ./src /work/src
