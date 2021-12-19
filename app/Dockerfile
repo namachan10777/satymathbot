@@ -3,9 +3,14 @@ FROM rust:slim-buster as satymathbot-builder
 ENV PATH /root/.cargo/bin:$PATH
 RUN cargo install cargo-chef
 WORKDIR /work
-COPY . /work/
-RUN cargo chef prepare --recipe-path recipe.json
-RUN cargo chef cook --release --recipe-path recipe.json
+COPY Cargo.lock /work/Cargo.lock
+COPY Cargo.toml /work/Cargo.toml
+RUN echo 'fn main(){}' > /work/dummy.rs
+RUN sed -ie 's#src/main.rs#dummy.rs#g' Cargo.toml
+RUN cargo build --release
+COPY src /work/src
+COPY templates /work/templates
+RUN sed -ie 's#dummy.rs#src/main.rs#g' Cargo.toml
 RUN cargo build --release
 
 FROM public.ecr.aws/debian/debian:buster-slim
