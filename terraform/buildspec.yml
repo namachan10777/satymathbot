@@ -1,6 +1,7 @@
 version: 0.2
 env:
   variables:
+    DOCKER_BUILDKIT: 1
     AWS_ACCOUNT_ID: 966924987919
     REPO_APP: 966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-app
     REPO_NGINX: 966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-nginx
