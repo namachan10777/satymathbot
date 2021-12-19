@@ -1,4 +1,4 @@
-FROM public.ecr.aws/debian/debian:buster as satysfi-builder
+FROM public.ecr.aws/debian/debian:buster
 WORKDIR /work
 ARG CURL_VERSION=7.80.0
 RUN apt-get update && apt-get install -y wget make libtool libssl-dev autoconf patch unzip git bzip2 pkg-config

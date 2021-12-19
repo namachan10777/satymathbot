@@ -4,6 +4,9 @@ env:
     DOCKER_BUILDKIT: 1
     AWS_ACCOUNT_ID: 966924987919
 phases:
+  install:
+    runtime-versions:
+      docker: 19
   pre_build:
     commands:
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
