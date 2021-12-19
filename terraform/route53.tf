@@ -28,10 +28,21 @@ resource "aws_acm_certificate_validation" "main" {
   validation_record_fqdns = [aws_route53_record.cert[each.key].fqdn]
 }
 
-resource "aws_route53_record" "main" {
+resource "aws_route53_record" "ipv4" {
   zone_id = aws_route53_zone.satymathbot.zone_id
   name    = "satymathbot.net"
   type    = "A"
+  alias {
+    name                   = aws_alb.main.dns_name
+    zone_id                = aws_alb.main.zone_id
+    evaluate_target_health = true
+  }
+}
+
+resource "aws_route53_record" "ipv6" {
+  zone_id = aws_route53_zone.satymathbot.zone_id
+  name    = "satymathbot.net"
+  type    = "AAAA"
   alias {
     name                   = aws_alb.main.dns_name
     zone_id                = aws_alb.main.zone_id

@@ -28,6 +28,7 @@ resource "aws_alb" "main" {
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
   subnets            = [for subnet in aws_subnet.public : subnet.id]
+  ip_address_type    = "dualstack"
 
   enable_deletion_protection = true
 }
