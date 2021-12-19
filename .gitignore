@@ -15,9 +15,7 @@
 # vendor/
 
 
-# Added by cargo
-
-/target
+/app/target
 
 test.png
 

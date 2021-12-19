@@ -20,24 +20,16 @@ jobs:
     - name: Install jsonnet
       uses: kobtea/setup-jsonnet-action@v1
     - name: Build
-      uses: actions-rs/cargo@v1
-      with:
-        command: build
-        args: --verbose
+      run: cargo build --verbose
+      working-directory: app
     - name: Test
-      uses: actions-rs/cargo@v1
-      with:
-        command: test
-        args: --verbose
+      run: cargo test --verbose
+      working-directory: app
     - name: Format
-      uses: actions-rs/cargo@v1
-      with:
-        command: fmt
-        args: -- --check
+      run: cargo fmt -- --check
+      working-directory: app
     - name: Clippy
-      uses: actions-rs/clippy-check@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        args: -- -D warnings
+      run: cargo clippy -- -D warnings
+      working-directory: app
     - name: config validate
       run: make test

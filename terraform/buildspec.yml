@@ -3,31 +3,10 @@ env:
   variables:
     DOCKER_BUILDKIT: 1
     AWS_ACCOUNT_ID: 966924987919
-    REPO_APP: 966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-app
-    REPO_NGINX: 966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-nginx
-    REPO_ENVOY: 966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-envoy
 phases:
   pre_build:
     commands:
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-      - docker pull ${REPO_APP}:latest || true
-      - docker pull ${REPO_NGINX}:latest || true
-      - docker pull ${REPO_ENVOY}:latest || true
-      - export REVISION=$(git rev-parse HEAD)
   build:
     commands:
-      - docker build -t ${REPO_APP}:${REVISION} -f ./dockerfile/app/Dockerfile --cache-from ${REPO_APP}:latest .
-      - docker build -t ${REPO_ENVOY}:${REVISION} --cache-from ${REPO_ENVOY}:latest ./dockerfile/envoy
-      - docker build -t ${REPO_NGINX}:${REVISION} --cache-from ${REPO_NGINX}:latest ./dockerfile/nginx
-  post_build:
-    commands:
-      - docker tag ${REPO_APP}:${REVISION} ${REPO_APP}:latest
-      - docker tag ${REPO_ENVOY}:${REVISION} ${REPO_ENVOY}:latest
-      - docker tag ${REPO_NGINX}:${REVISION} ${REPO_NGINX}:latest
-
-      - docker push ${REPO_APP}:${REVISION}
-      - docker push ${REPO_ENVOY}:${REVISION}
-      - docker push ${REPO_NGINX}:${REVISION}
-      - docker push ${REPO_APP}:latest
-      - docker push ${REPO_ENVOY}:latest
-      - docker push ${REPO_NGINX}:latest
+      bash ./ci/build_and_push.sh
