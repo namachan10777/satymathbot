@@ -9,8 +9,8 @@ function build_and_push {
     local repo="${ECR_REGISTRY}/satymathbot-$1"
     local revision="$(git rev-parse HEAD)"
     docker pull "${repo}":latest || true
-    docker build -t "${repo}:${revision}" --cache-from "${repo}:latest" "$1" 
-    docker tag "${repo}:${revision}" "${repo}:latest"
+    docker build -t "${repo}:latest" --cache-from "${repo}:latest" "$1" 
+    docker tag "${repo}:latest" "${repo}:${revision}"
     docker push "${repo}:latest"
     docker push "${repo}:${revision}"
 }
