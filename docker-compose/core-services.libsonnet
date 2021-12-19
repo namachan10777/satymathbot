@@ -16,6 +16,6 @@
             context: "./dockerfile/envoy",
             dockerfile: "Dockerfile",
         },
-        ports: ["8080:8080","9901:9901"],
+        ports: ["8080:80","9901:9901"],
     },
 }
