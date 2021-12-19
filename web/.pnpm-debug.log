@@ -1,0 +1,22 @@
+{
+  "0 debug pnpm:scope": {
+    "selected": 1
+  },
+  "1 error pnpm": {
+    "code": "ELIFECYCLE",
+    "errno": "ENOENT",
+    "syscall": "spawn",
+    "file": "sh",
+    "pkgid": "satymathbot-web`@0.0.1",
+    "stage": "dev",
+    "script": "svelte-kit dev \"--open\"",
+    "pkgname": "satymathbot-web`",
+    "err": {
+      "name": "pnpm",
+      "message": "satymathbot-web`@0.0.1 dev: `svelte-kit dev \"--open\"`\nspawn ENOENT",
+      "code": "ELIFECYCLE",
+      "stack": "pnpm: satymathbot-web`@0.0.1 dev: `svelte-kit dev \"--open\"`\nspawn ENOENT\n    at ChildProcess.<anonymous> (/Users/namachan/.npm-packages/lib/node_modules/pnpm/dist/pnpm.cjs:91776:22)\n    at ChildProcess.emit (node:events:390:28)\n    at maybeClose (node:internal/child_process:1062:16)\n    at Process.ChildProcess._handle.onexit (node:internal/child_process:301:5)"
+    }
+  },
+  "2 warn pnpm:global": " Local package.json exists, but node_modules missing, did you mean to install?"
+}
