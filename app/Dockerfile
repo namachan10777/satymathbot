@@ -17,7 +17,7 @@ RUN bash ci/prepare_cache.sh
 RUN cargo build --release
 RUN bash ci/upload_cache.sh
 
-FROM public.ecr.aws/debian/debian:buster
+FROM public.ecr.aws/debian/debian:buster-slim
 RUN apt-get update && apt-get install -y poppler-utils libjpeg-dev
 COPY ./satysfi/empty.satyh /etc/satymathbot/empty.satyh
 COPY --from=satysfi-builder /usr/local/bin/satysfi /usr/local/bin/satysfi
