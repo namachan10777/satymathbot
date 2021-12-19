@@ -1,8 +1,3 @@
-data "aws_acm_certificate" "main" {
-  domain   = "satymathbot.science"
-  statuses = ["ISSUED"]
-}
-
 resource "aws_security_group" "alb" {
   name        = "satymathbot-alb"
   description = "Allow https access"
@@ -54,7 +49,7 @@ resource "aws_lb_listener" "main" {
   load_balancer_arn = aws_alb.main.arn
   port              = 443
   protocol          = "HTTPS"
-  certificate_arn   = data.aws_acm_certificate.main.arn
+  certificate_arn   = aws_acm_certificate.main.arn
 
   default_action {
     target_group_arn = aws_lb_target_group.main.arn
