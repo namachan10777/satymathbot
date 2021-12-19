@@ -15,9 +15,9 @@ phases:
       - export REVISION=$(git rev-parse HEAD)
   build:
     commands:
-      - docker build -t ${REPO_APP}:${REVISION} -f ./dockerfile/app/Dockerfile . --cache-from ${REPO_APP}:latest
-      - docker build -t ${REPO_ENVOY}:${REVISION} ./dockerfile/envoy --cache-from ${REPO_ENVOY}:latest
-      - docker build -t ${REPO_NGINX}:${REVISION} ./dockerfile/nginx --cache-from ${REPO_NGINX}:latest
+      - docker build -t ${REPO_APP}:${REVISION} -f ./dockerfile/app/Dockerfile --cache-from ${REPO_APP}:latest .
+      - docker build -t ${REPO_ENVOY}:${REVISION} --cache-from ${REPO_ENVOY}:latest ./dockerfile/envoy
+      - docker build -t ${REPO_NGINX}:${REVISION} --cache-from ${REPO_NGINX}:latest ./dockerfile/nginx
   post_build:
     commands:
       - docker tag ${REPO_APP}:${REVISION} ${REPO_APP}:latest
