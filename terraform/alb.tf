@@ -35,12 +35,12 @@ resource "aws_alb" "main" {
 
 resource "aws_lb_target_group" "main" {
   name        = "satymathbot"
-  port        = 80
+  port        = 8080
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
   target_type = "ip"
   health_check {
-    port     = 80
+    port     = 8080
     path     = "/health"
     timeout  = 10
     interval = 30
