@@ -18,5 +18,7 @@ RUN mkdir /tmp/satymathbot
 COPY --from=satysfi-builder /home/opam/.satysfi /home/satymathbot/.satysfi
 COPY --from=satysfi-builder /home/opam /home/opam
 
+EXPOSE 3000
+
 ENTRYPOINT [ "/usr/local/bin/satymathbot" ]
 CMD [ "-b", "/usr/local/bin/satysfi", "-s", "/etc/satymathbot/empty.satyh", "-p", "/usr/bin/pdftoppm", "-w", "/tmp/satymathbot" ]
