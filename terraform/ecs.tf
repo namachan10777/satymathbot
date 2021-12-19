@@ -5,8 +5,8 @@ resource "aws_security_group" "ecs" {
     from_port        = 80
     to_port          = 80
     protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
+    cidr_blocks      = [for subnet in aws_subnet.public : subnet.cidr_block]
+    ipv6_cidr_blocks = [for subnet in aws_subnet.public : subnet.ipv6_cidr_block]
   }
 
   egress {
