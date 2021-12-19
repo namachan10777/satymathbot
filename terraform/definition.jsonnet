@@ -1,5 +1,5 @@
-local reivision = '8b54fe9930351baf44c14cc1831aa841a079a19c';
-local image(component) = '966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-' + component + ':' + reivision;
+local revision = '552bce71333c846133c3d1d9f67fdfc513482d45';
+local image(component) = '966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-' + component + ':' + revision;
 local logConfiguration(component) = {
   logDriver: 'awslogs',
   options: {
