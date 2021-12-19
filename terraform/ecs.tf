@@ -107,7 +107,7 @@ resource "aws_ecs_service" "main" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.main.arn
-    container_name   = "nginx"
+    container_name   = "envoy"
     container_port   = 80
   }
 }
