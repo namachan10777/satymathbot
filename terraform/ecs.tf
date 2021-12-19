@@ -50,10 +50,15 @@ data "aws_iam_policy_document" "ecs-task-execution-awslogs" {
   statement {
     actions = [
       "logs:CreateLogGroup",
+    ]
+    resources = ["arn:aws:logs:ap-northeast-1:966924987919:log-group:*"]
+  }
+  statement {
+    actions = [
       "logs:CreateLogStream",
       "logs:PutLogEvents",
     ]
-    resources = ["*"]
+    resources = ["arn:aws:logs:ap-northeast-1:966924987919:log-group:satymathbot:*"]
   }
 }
 resource "aws_iam_role_policy" "ecs-execution-awslogs" {

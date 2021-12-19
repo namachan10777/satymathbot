@@ -17,11 +17,19 @@ resource "aws_iam_role" "CodeBuildSatymathbot" {
 data "aws_iam_policy_document" "codebuild" {
   statement {
     resources = [
-      "*"
+      "arn:aws:logs:ap-northeast-1:966924987919:log-group:*"
     ]
     effect = "Allow"
     actions = [
       "logs:CreateLogGroup",
+    ]
+  }
+  statement {
+    resources = [
+      "arn:aws:logs:ap-northeast-1:966924987919:log-group:/aws/codebuild/satymathbot:*"
+    ]
+    effect = "Allow"
+    actions = [
       "logs:CreateLogStream",
       "logs:PutLogEvents",
       "ecr:GetAuthorizationToken",
@@ -92,7 +100,7 @@ data "aws_iam_policy_document" "github-actions" {
     resources = [aws_codebuild_project.satymathbot.arn]
   }
   statement {
-    resources = ["*"]
+    resources = ["arn:aws:logs:ap-northeast-1:966924987919:log-group:/aws/codebuild/satymathbot:*"]
     effect    = "Allow"
     actions = [
       "logs:GetLogEvents",
