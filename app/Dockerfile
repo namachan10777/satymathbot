@@ -1,10 +1,11 @@
 FROM 966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-satysfi:latest as satysfi-builder
 FROM rust:slim-buster as satymathbot-builder
+ENV PATH /root/.cargo/bin:$PATH
+RUN cargo install cargo-chef
 WORKDIR /work
-COPY ./src /work/src
-COPY ./templates /work/templates
-COPY ./Cargo.toml /work/Cargo.toml
-COPY ./Cargo.lock /work/Cargo.lock
+COPY . /work/
+RUN cargo chef prepare --recipe-path recipe.json
+RUN cargo chef cook --release --recipe-path recipe.json
 RUN cargo build --release
 
 FROM public.ecr.aws/debian/debian:buster-slim
