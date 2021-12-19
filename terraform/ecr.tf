@@ -6,13 +6,20 @@ data "aws_iam_policy_document" "ecr-policy" {
       identifiers = [aws_iam_role.CodeBuildSatymathbot.arn]
     }
     actions = [
-      "ecr:BatchGetImage",
+      "ecr:GetAuthorizationToken",
       "ecr:BatchCheckLayerAvailability",
-      "ecr:CompleteLayerUpload",
       "ecr:GetDownloadUrlForLayer",
+      "ecr:GetRepositoryPolicy",
+      "ecr:DescribeRepositories",
+      "ecr:ListImages",
+      "ecr:DescribeImages",
+      "ecr:BatchGetImage",
+      "ecr:ListTagsForResource",
+      "ecr:DescribeImageScanFindings",
       "ecr:InitiateLayerUpload",
-      "ecr:PutImage",
-      "ecr:UploadLayerPart"
+      "ecr:UploadLayerPart",
+      "ecr:CompleteLayerUpload",
+      "ecr:PutImage"
     ]
   }
 }
