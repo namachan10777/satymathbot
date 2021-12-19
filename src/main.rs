@@ -79,7 +79,7 @@ async fn main() {
         .route("/:file", routing::get(satymathbot::endpoint))
         .route("/health", routing::get(health))
         .layer(axum::AddExtensionLayer::new(state));
-    let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
     info!("Listen on {}", addr);
     if let Err(e) = axum::Server::bind(&addr)
         .serve(app.into_make_service())
