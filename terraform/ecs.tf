@@ -1,6 +1,6 @@
 resource "aws_security_group" "ecs" {
   name   = "satymathbot-ecs"
-  vpc_id = data.aws_vpc.default.id
+  vpc_id = aws_vpc.main.id
   ingress {
     from_port        = 80
     to_port          = 80
@@ -93,8 +93,9 @@ resource "aws_ecs_service" "main" {
   launch_type     = "FARGATE"
   desired_count   = 1
   task_definition = aws_ecs_task_definition.main.arn
+  depends_on      = [aws_alb.main]
   network_configuration {
-    subnets          = data.aws_subnet_ids.default.ids
+    subnets          = [for subnet in aws_subnet.public : subnet.id]
     security_groups  = [aws_security_group.ecs.id]
     assign_public_ip = true
   }
