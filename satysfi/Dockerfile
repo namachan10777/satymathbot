@@ -11,7 +11,7 @@ RUN opam install -y satysfi satysfi-dist satyrographos
 RUN opam exec -- satyrographos install
 
 USER root
-RUN cp /home/opam/.opam/4.10.0/bin/satysfi /usr/local/bin/satysfi
+RUN cp /home/opam/.opam/4.10/bin/satysfi /usr/local/bin/satysfi
 
 USER satysfi
 
