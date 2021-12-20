@@ -24,9 +24,8 @@ docker-compose-core: docker-compose-core.yml
 docker-compose-metrics: docker-compose-metrics.yml
 	docker-compose -f $< up --build
 
-.PHONY: test
-test: docker-compose-validate.yml
-	cargo test
+.PHONY: configtest
+configtest: docker-compose-validate.yml
 	docker-compose -f $< down
 	docker-compose -f $< up --build -d
 	docker-compose -f $< exec -T nginx nginx -t
