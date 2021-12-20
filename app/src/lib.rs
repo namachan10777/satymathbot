@@ -196,6 +196,10 @@ async fn handle(state: Arc<State>, query: Query) -> Result<MathState, Error> {
 }
 
 pub async fn prepare(style_file: &str, workdir: &str) -> io::Result<()> {
+    let path = std::path::Path::new(workdir);
+    if path.exists() {
+        fs::create_dir_all(path).await?;
+    }
     let to = format!("{}/empty.satyh", workdir);
     fs::copy(style_file, to).await.map(|_| ())
 }

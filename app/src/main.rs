@@ -114,6 +114,19 @@ where
     Ok(())
 }
 
+async fn prepare_sock_dir<P>(app: P, health: P) -> io::Result<()>
+where
+    P: AsRef<Path>,
+{
+    if let Some(app_parent) = app.as_ref().parent() {
+        fs::create_dir_all(app_parent).await?;
+    }
+    if let Some(health_present) = health.as_ref().parent() {
+        fs::create_dir_all(health_present).await?;
+    }
+    Ok(())
+}
+
 async fn run_server(cfg: Config) {
     let state = Arc::new(satymathbot::State::new(cfg.clone().into()));
     clear_socket(&cfg.sock_path, &cfg.healthcheck_sock_path)
@@ -127,6 +140,12 @@ async fn run_server(cfg: Config) {
         .route("/health", routing::get(health))
         .layer(axum::AddExtensionLayer::new(state));
     let health = axum::Router::new().route("/", routing::get(health));
+    prepare_sock_dir(&cfg.sock_path, &cfg.healthcheck_sock_path)
+        .await
+        .unwrap_or_else(|e| {
+            error!("Cannot create socket dir due to {}", e);
+            exit(-1);
+        });
     info!("Listen on {}", cfg.sock_path);
     let healthcheck_sock_path = cfg.healthcheck_sock_path.to_owned();
     tokio::spawn(async move {
