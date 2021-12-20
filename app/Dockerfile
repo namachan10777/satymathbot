@@ -13,7 +13,7 @@ COPY templates /work/templates
 RUN sed -ie 's#dummy.rs#src/main.rs#g' Cargo.toml
 RUN cargo build --release
 
-FROM public.ecr.aws/debian/debian:buster-slim
+FROM public.ecr.aws/ubuntu/ubuntu:21.04
 RUN apt-get update && apt-get install -y poppler-utils libjpeg-dev
 COPY ./satysfi/empty.satyh /etc/satymathbot/empty.satyh
 COPY --from=satysfi-builder /usr/local/bin/satysfi /usr/local/bin/satysfi
