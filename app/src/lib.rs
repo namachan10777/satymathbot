@@ -24,9 +24,10 @@ struct SatyTemplate {
 }
 
 pub struct Config {
-    workdir: String,
-    satysfi: String,
-    pdftoppm: String,
+    pub capacity: usize,
+    pub workdir: String,
+    pub satysfi: String,
+    pub pdftoppm: String,
 }
 
 pub struct State {
@@ -35,14 +36,10 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(workdir: String, satysfi: String, pdftoppm: String, cache_capacity: usize) -> Self {
+    pub fn new(cfg: Config) -> Self {
         Self {
-            math: Mutex::new(lru::LruCache::new(cache_capacity)),
-            cfg: Config {
-                workdir,
-                satysfi,
-                pdftoppm,
-            },
+            math: Mutex::new(lru::LruCache::new(cfg.capacity)),
+            cfg,
         }
     }
 }
