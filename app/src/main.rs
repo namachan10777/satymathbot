@@ -1,10 +1,13 @@
-use axum::{response::IntoResponse, routing, Json};
+use axum::{response::IntoResponse, routing, Json, Router};
 use clap::StructOpt;
+use futures::future::{select, Either};
+use futures::pin_mut;
 use hyperlocal::UnixServerExt;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::process::exit;
 use std::sync::Arc;
+use std::{net::SocketAddr, path::PathBuf};
 use tokio::{fs, io};
 use tracing::{error, info};
 
@@ -23,14 +26,20 @@ struct Parser {
 }
 
 #[derive(Serialize, Deserialize, Clone)]
-pub struct Config {
+enum SockInfo {
+    Unix(String),
+    Tcp(u16),
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct Config {
     pub satysfi: String,
     pub pdftoppm: String,
     pub satyh: String,
     pub workdir: String,
     pub capacity: usize,
-    pub sock_path: String,
-    pub healthcheck_sock_path: String,
+    pub sock: SockInfo,
+    pub healthcheck_sock: SockInfo,
 }
 
 impl Default for Config {
@@ -41,10 +50,20 @@ impl Default for Config {
             satyh: "/usr/share/satymathbot/empty.satyh".to_owned(),
             workdir: "/tmp/satymathbot".to_owned(),
             capacity: 4096,
-            sock_path: "/var/run/saytmathbot/app.sock".to_owned(),
-            healthcheck_sock_path: "/var/run/satymathbot/app_health.sock".to_owned(),
+            sock: SockInfo::Tcp(3000),
+            healthcheck_sock: SockInfo::Tcp(3001),
         }
     }
+}
+
+enum Error {
+    CreateSockDir(String, io::Error),
+    RemoveSock(String, io::Error),
+    TcpServer(u16, hyper::Error),
+    UnixDomainSocketServer(String, hyper::Error),
+    BindUnixDomainSocket(String, io::Error),
+    ReadConfig(PathBuf, io::Error),
+    LoadConfig(ron::Error),
 }
 
 impl From<Config> for satymathbot::Config {
@@ -101,82 +120,81 @@ async fn prepare_env(cfg: &Config) {
     }
 }
 
-async fn clear_socket<P>(app: P, health: P) -> io::Result<()>
-where
-    P: AsRef<Path>,
-{
-    if app.as_ref().exists() {
-        fs::remove_file(app).await?;
-    }
-    if health.as_ref().exists() {
-        fs::remove_file(health).await?;
-    }
-    Ok(())
-}
-
-async fn prepare_sock_dir<P>(app: P, health: P) -> io::Result<()>
-where
-    P: AsRef<Path>,
-{
-    if let Some(app_parent) = app.as_ref().parent() {
-        fs::create_dir_all(app_parent).await?;
-    }
-    if let Some(health_present) = health.as_ref().parent() {
-        fs::create_dir_all(health_present).await?;
+async fn prepare_sock(sock: &SockInfo) -> Result<(), Error> {
+    if let SockInfo::Unix(path_str) = sock {
+        let path = Path::new(path_str);
+        if path.exists() {
+            fs::remove_file(path)
+                .await
+                .map_err(|e| Error::RemoveSock(path_str.to_owned(), e))?;
+        } else if let Some(parent) = path.parent() {
+            if !parent.exists() {
+                fs::create_dir_all(path)
+                    .await
+                    .map_err(|e| Error::CreateSockDir(path_str.to_owned(), e))?;
+            }
+        }
     }
     Ok(())
 }
 
-async fn run_server(cfg: Config) {
-    let state = Arc::new(satymathbot::State::new(cfg.clone().into()));
-    clear_socket(&cfg.sock_path, &cfg.healthcheck_sock_path)
-        .await
-        .unwrap_or_else(|e| {
-            error!("Cannot clean up sockets due to {}", e);
-            exit(-1);
-        });
+async fn run_hyper_server(sock: &SockInfo, router: Router) -> Result<(), Error> {
+    match sock {
+        SockInfo::Tcp(port) => {
+            let addr = SocketAddr::from(([0, 0, 0, 0], *port));
+            axum::Server::bind(&addr)
+                .serve(router.into_make_service())
+                .with_graceful_shutdown(shutdown_signal())
+                .await
+                .map_err(|e| Error::TcpServer(*port, e))
+        }
+        SockInfo::Unix(path) => axum::Server::bind_unix(path)
+            .map_err(|e| Error::BindUnixDomainSocket(path.to_owned(), e))?
+            .serve(router.into_make_service())
+            .with_graceful_shutdown(shutdown_signal())
+            .await
+            .map_err(|e| Error::UnixDomainSocketServer(path.to_owned(), e)),
+    }
+}
+
+async fn run_app_server(sock: &SockInfo, cfg: satymathbot::Config) -> Result<(), Error> {
+    prepare_sock(sock).await?;
+    let state = Arc::new(satymathbot::State::new(cfg));
     let app = axum::Router::new()
         .route("/:file", routing::get(satymathbot::endpoint))
         .route("/health", routing::get(health))
         .layer(axum::AddExtensionLayer::new(state));
+    run_hyper_server(sock, app).await
+}
+
+async fn run_healthcheck_server(sock: &SockInfo) -> Result<(), Error> {
+    prepare_sock(sock).await?;
     let health = axum::Router::new().route("/", routing::get(health));
-    prepare_sock_dir(&cfg.sock_path, &cfg.healthcheck_sock_path)
-        .await
-        .unwrap_or_else(|e| {
-            error!("Cannot create socket dir due to {}", e);
-            exit(-1);
-        });
-    info!("Listen on {}", cfg.sock_path);
-    let healthcheck_sock_path = cfg.healthcheck_sock_path.to_owned();
-    tokio::spawn(async move {
-        if let Err(e) = axum::Server::bind_unix(healthcheck_sock_path.clone())
-            .unwrap_or_else(|e| {
-                error!(
-                    "Cannot bind unix socket {} due to {}",
-                    healthcheck_sock_path, e
-                );
-                exit(-1);
-            })
-            .serve(health.into_make_service())
-            .with_graceful_shutdown(shutdown_signal())
-            .await
-        {
-            error!("Health server exited accidently: {:?}", e);
-            exit(-1);
-        }
-    });
-    if let Err(e) = axum::Server::bind_unix(&cfg.sock_path)
-        .unwrap_or_else(|e| {
-            error!("Cannot bind unix socket {} due to {}", cfg.sock_path, e);
-            exit(-1);
-        })
-        .serve(app.into_make_service())
-        .with_graceful_shutdown(shutdown_signal())
-        .await
-    {
-        error!("Server exited accidently: {:?}", e);
-        exit(-1);
+    run_hyper_server(sock, health).await
+}
+
+async fn run_server(cfg: Config) -> Result<(), Error> {
+    let health = run_healthcheck_server(&cfg.healthcheck_sock);
+    let app = run_app_server(&cfg.sock, cfg.clone().into());
+    pin_mut!(health);
+    pin_mut!(app);
+    match select(health, app).await {
+        Either::Left((r, _)) => r,
+        Either::Right((r, _)) => r,
     }
+}
+
+async fn serve<P>(cfg_path: P) -> Result<(), Error>
+where
+    P: AsRef<Path>,
+{
+    let cfg_path = cfg_path.as_ref();
+    let cfg = fs::read_to_string(cfg_path)
+        .await
+        .map_err(|e| Error::ReadConfig(cfg_path.to_owned(), e))?;
+    let cfg = ron::from_str(&cfg).map_err(Error::LoadConfig)?;
+    prepare_env(&cfg).await;
+    run_server(cfg).await
 }
 
 #[tokio::main]
@@ -185,16 +203,26 @@ async fn main() {
     let opts = Parser::parse();
     match opts.serve {
         Some(cfg) => {
-            let cfg = fs::read_to_string(&cfg).await.unwrap_or_else(|e| {
-                error!("Cannot read config file {} due to {:?}", cfg, e);
+            if let Err(e) = serve(cfg).await {
+                match e {
+                    Error::BindUnixDomainSocket(path, e) => {
+                        error!("bind unix socket {} due to {}", path, e)
+                    }
+                    Error::CreateSockDir(dir, e) => {
+                        error!("create socket dir {} due to {}", dir, e)
+                    }
+                    Error::ReadConfig(path, e) => error!("read config {:?} due to {}", path, e),
+                    Error::RemoveSock(path, e) => error!("remove sock {} due to {}", path, e),
+                    Error::TcpServer(port, e) => {
+                        error!("launch tcp server with port {} due to {}", port, e)
+                    }
+                    Error::UnixDomainSocketServer(sock, e) => {
+                        error!("launch unix domain socket server on {} due to {}", sock, e)
+                    }
+                    Error::LoadConfig(e) => error!("load config due to {}", e),
+                }
                 exit(-1);
-            });
-            let cfg: Config = ron::from_str(&cfg).unwrap_or_else(|e| {
-                error!("Invalid config file ({:?})", e);
-                exit(-1);
-            });
-            prepare_env(&cfg).await;
-            run_server(cfg).await;
+            }
         }
         None => {
             let pretty_cfg = ron::ser::PrettyConfig::new();

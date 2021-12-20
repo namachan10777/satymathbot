@@ -1,0 +1,9 @@
+(
+    satysfi: "/usr/local/bin/satysfi",
+    pdftoppm: "/usr/bin/pdftoppm",
+    satyh: "/usr/local/share/satysfimathbot/empty.satyh",
+    workdir: "/tmp/satymathbot",
+    capacity: 4096,
+    sock_path: Unix("/var/run/satymathbot/app.sock"),
+    healthcheck_sock_path: Unix("/var/run/satymathbot/app_health.sock"),
+)
