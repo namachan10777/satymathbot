@@ -1,4 +1,4 @@
-local revision = 'e729a735e300bfafb63dc0f8d2fab3e5d4b78f4d';
+local revision = '01af6b81f42952341f4877f943642127ea8dce25';
 local image(component) = '966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-' + component + ':' + revision;
 local logConfiguration = {
   logDriver: 'awslogs',
@@ -9,7 +9,7 @@ local logConfiguration = {
     'awslogs-stream-prefix': 'satymathbot',
   },
 };
-local mountpoint = {
+local mountPoint = {
   containerPath: '/var/run/satymathbot',
   sourceVolume: 'sock',
 };
@@ -18,16 +18,24 @@ local component(name) = {
   name: name,
   image: image(name),
   logConfiguration: logConfiguration,
-  mountpoints: [mountpoint],
+  mountPoints: [mountPoint],
+};
+
+local depends(name) = {
+  containerName: name,
+  condition: 'START',
 };
 
 [
-  component('nginx'),
+  component('nginx') {
+    dependsOn: [depends('app')],
+  },
   component('envoy') {
     portMappings: [{
       hostPort: 8080,
       containerPort: 8080,
     }],
+    dependsOn: [depends('nginx')],
   },
   component('app'),
 ]
