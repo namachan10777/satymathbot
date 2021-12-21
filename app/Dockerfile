@@ -33,12 +33,14 @@ COPY --from=satysfi-builder /usr/local/bin/satysfi /usr/local/bin/satysfi
 COPY --from=satymathbot-builder /work/target/release/satymathbot /usr/local/bin/satymathbot
 COPY --from=satysfi-builder /home/opam/.satysfi /home/satymathbot/.satysfi
 COPY --from=satysfi-builder /home/opam/.opam/4.10/share/satysfi /home/opam/.opam/4.10/share/satysfi
+COPY ./entry.sh /usr/local/bin/entry.sh
 
-RUN groupadd -g 101 satymathbot
-RUN useradd -rm -s /bin/bash -u 101 -g satymathbot satymathbot
-RUN mkdir -p /var/run/satymathbot && chown satymathbot:satymathbot /var/run/satymathbot
+RUN groupadd -g 101 satymathbot && useradd -rm -s /bin/bash -u 101 -g satymathbot satymathbot
+
+RUN chown root:root /usr/local/bin/entry.sh && chmod 4755 /usr/local/bin/entry.sh
+RUN chown satymathbot:satymathbot /usr/local/bin/satymathbot && chmod 4755 /usr/local/bin/satymathbot
+
 VOLUME [ "/var/run/satymathbot" ]
-USER satymathbot
 
-ENTRYPOINT [ "/usr/local/bin/satymathbot" ]
+ENTRYPOINT [ "/usr/local/bin/entry.sh" ]
 CMD [ "-s", "/etc/satymathbot/config.ron" ]
