@@ -1,4 +1,4 @@
-FROM public.ecr.aws/bitnami/envoy:v1.20.1
+FROM public.ecr.aws/bitnami/envoy:1.20.1
 
 COPY files/etc/envoy /etc/envoy
 

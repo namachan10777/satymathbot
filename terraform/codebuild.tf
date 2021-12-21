@@ -129,6 +129,11 @@ data "aws_iam_policy_document" "github-actions" {
     resources = [aws_codebuild_project.satymathbot.arn]
   }
   statement {
+    effect    = "Allow"
+    actions   = ["ecr:GetAuthorizationToken"]
+    resources = ["*"]
+  }
+  statement {
     resources = ["arn:aws:logs:ap-northeast-1:966924987919:log-group:/aws/codebuild/satymathbot:*"]
     effect    = "Allow"
     actions = [

@@ -3,7 +3,7 @@ data "aws_iam_policy_document" "ecr-policy" {
     effect = "Allow"
     principals {
       type        = "AWS"
-      identifiers = [aws_iam_role.CodeBuildSatymathbot.arn]
+      identifiers = [aws_iam_role.CodeBuildSatymathbot.arn, aws_iam_role.github-actions.arn]
     }
     actions = [
       "ecr:GetAuthorizationToken",
