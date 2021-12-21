@@ -195,13 +195,23 @@ async fn handle(state: Arc<State>, query: Query) -> Result<MathState, Error> {
     }
 }
 
-pub async fn prepare(style_file: &str, workdir: &str) -> io::Result<()> {
+pub enum PrepareError {
+    CreateDir(String, io::Error),
+    CopySatyh(String, String, io::Error),
+}
+
+pub async fn prepare(style_file: &str, workdir: &str) -> Result<(), PrepareError> {
     let path = std::path::Path::new(workdir);
-    if path.exists() {
-        fs::create_dir_all(path).await?;
+    if !path.exists() {
+        fs::create_dir_all(path)
+            .await
+            .map_err(|e| PrepareError::CreateDir(workdir.to_owned(), e))?;
     }
     let to = format!("{}/empty.satyh", workdir);
-    fs::copy(style_file, to).await.map(|_| ())
+    fs::copy(style_file, to.clone())
+        .await
+        .map(|_| ())
+        .map_err(|e| PrepareError::CopySatyh(style_file.to_owned(), to, e))
 }
 
 enum Query {

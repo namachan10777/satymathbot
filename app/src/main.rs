@@ -4,6 +4,7 @@ use futures::future::{select, Either};
 use futures::pin_mut;
 use hyperlocal::UnixServerExt;
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 use std::path::Path;
 use std::process::exit;
 use std::sync::Arc;
@@ -29,6 +30,15 @@ struct Parser {
 enum SockInfo {
     Unix(String),
     Tcp(u16),
+}
+
+impl Display for SockInfo {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Unix(path) => write!(f, "unix:/{}", path),
+            Self::Tcp(port) => write!(f, "0.0.0.0:{}", port),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -64,6 +74,18 @@ enum Error {
     BindUnixDomainSocket(String, io::Error),
     ReadConfig(PathBuf, io::Error),
     LoadConfig(ron::Error),
+    CreateWorkdir(String, io::Error),
+    CopySatyh(String, String, io::Error),
+}
+
+impl From<satymathbot::PrepareError> for Error {
+    fn from(e: satymathbot::PrepareError) -> Self {
+        use satymathbot::PrepareError;
+        match e {
+            PrepareError::CopySatyh(from, to, e) => Error::CopySatyh(from, to, e),
+            PrepareError::CreateDir(dir, e) => Error::CreateWorkdir(dir, e),
+        }
+    }
 }
 
 impl From<Config> for satymathbot::Config {
@@ -109,15 +131,6 @@ async fn health() -> impl IntoResponse {
     Json(HealthResponse {
         status: HealthStatus::Ok,
     })
-}
-
-async fn prepare_env(cfg: &Config) {
-    if let Err(e) = satymathbot::prepare(&cfg.satyh, &cfg.workdir).await {
-        error!("Cannot prepare environment due to {:?}", e);
-        exit(-1);
-    } else {
-        info!("Prepared environment")
-    }
 }
 
 async fn prepare_sock(sock: &SockInfo) -> Result<(), Error> {
@@ -178,6 +191,8 @@ async fn run_server(cfg: Config) -> Result<(), Error> {
     let app = run_app_server(&cfg.sock, cfg.clone().into());
     pin_mut!(health);
     pin_mut!(app);
+    info!("app starts listening on {}", cfg.sock);
+    info!("healthcheck starts listening on {}", cfg.healthcheck_sock);
     match select(health, app).await {
         Either::Left((r, _)) => r,
         Either::Right((r, _)) => r,
@@ -192,8 +207,12 @@ where
     let cfg = fs::read_to_string(cfg_path)
         .await
         .map_err(|e| Error::ReadConfig(cfg_path.to_owned(), e))?;
-    let cfg = ron::from_str(&cfg).map_err(Error::LoadConfig)?;
-    prepare_env(&cfg).await;
+    let cfg: Config = ron::from_str(&cfg).map_err(Error::LoadConfig)?;
+    satymathbot::prepare(&cfg.satyh, &cfg.workdir).await?;
+    info!(
+        "prepared env satyh: {}, workdir: {}",
+        cfg.satyh, cfg.workdir
+    );
     run_server(cfg).await
 }
 
@@ -220,6 +239,12 @@ async fn main() {
                         error!("launch unix domain socket server on {} due to {}", sock, e)
                     }
                     Error::LoadConfig(e) => error!("load config due to {}", e),
+                    Error::CreateWorkdir(dir, e) => {
+                        error!("create working directory {} due to {}", dir, e)
+                    }
+                    Error::CopySatyh(from, to, e) => {
+                        error!("copy satyh file {} to {} due to {}", from, to, e)
+                    }
                 }
                 exit(-1);
             }

@@ -34,6 +34,5 @@ static_resources:
       - lb_endpoints:
         - endpoint:
             address:
-              socket_address:
-                address: 127.0.0.1
-                port_value: 80
+              pipe:
+                path: /var/run/satymathbot/nginx.sock

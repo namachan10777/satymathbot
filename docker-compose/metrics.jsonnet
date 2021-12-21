@@ -1,4 +1,4 @@
-local core = import "./core-services.libsonnet";
+local core = import "./core.libsonnet";
 local metrics = {
     prometheus: {
         build: "./docker-compose/metrics/prometheus"
@@ -8,7 +8,6 @@ local metrics = {
         ports: ["3000:3000"],
     },
 };
-{
-    version: "3.0",
-    services: core + metrics,
+core {
+    services: core.services + metrics
 }

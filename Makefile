@@ -7,13 +7,13 @@ SATYH_PATH=satysfi/empty.satyh
 dev:
 	cd app && cargo watch -x 'run -- -b $(SATYSFI_PATH) -w $(WORKDIR) -s $(SATYH_PATH) -p $(PDFTOPPM_PATH)'
 
-docker-compose-core.yml: docker-compose/core.jsonnet docker-compose/core-services.libsonnet
+docker-compose-core.yml: docker-compose/core.jsonnet docker-compose/core.libsonnet
 	jsonnet $< > $@
 
-docker-compose-metrics.yml: docker-compose/metrics.jsonnet docker-compose/core-services.libsonnet
+docker-compose-metrics.yml: docker-compose/metrics.jsonnet docker-compose/core.libsonnet
 	jsonnet $< > $@
 
-docker-compose-validate.yml: docker-compose/validate.jsonnet docker-compose/core-services.libsonnet
+docker-compose-validate.yml: docker-compose/validate.jsonnet docker-compose/core.libsonnet
 	jsonnet $< > $@
 
 .PHONY: docker-compose-core
