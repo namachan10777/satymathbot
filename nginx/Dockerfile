@@ -1,4 +1,4 @@
-FROM nginx:1.21.4
+FROM public.ecr.aws/docker/library/nginx:latest:1.21.4
 
 COPY ./files/etc/nginx/nginx.conf /etc/nginx/nginx.conf
 

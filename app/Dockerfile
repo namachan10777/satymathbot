@@ -1,5 +1,5 @@
 FROM 966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-satysfi:latest as satysfi-builder
-FROM rust:slim-buster as satymathbot-builder
+FROM public.ecr.aws/docker/library/rust:latest as satymathbot-builder
 WORKDIR /work
 COPY Cargo.lock /work/Cargo.lock
 COPY Cargo.toml /work/Cargo.toml
