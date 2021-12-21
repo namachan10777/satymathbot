@@ -5,6 +5,7 @@ use futures::pin_mut;
 use hyperlocal::UnixServerExt;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
+use std::os::unix::fs::MetadataExt;
 use std::path::Path;
 use std::process::exit;
 use std::sync::Arc;
@@ -140,11 +141,20 @@ async fn prepare_sock(sock: &SockInfo) -> Result<(), Error> {
             fs::remove_file(path)
                 .await
                 .map_err(|e| Error::RemoveSock(path_str.to_owned(), e))?;
-        } else if let Some(parent) = path.parent() {
+        }
+        if let Some(parent) = path.parent() {
             if !parent.exists() {
                 fs::create_dir_all(path)
                     .await
                     .map_err(|e| Error::CreateSockDir(path_str.to_owned(), e))?;
+            } else if let Ok(metadata) = fs::metadata(parent).await {
+                info!(
+                    "sockdir {:?}: perm: {:?}, uid: {}, gid: {}",
+                    parent,
+                    metadata.permissions(),
+                    metadata.uid(),
+                    metadata.gid()
+                );
             }
         }
     }
