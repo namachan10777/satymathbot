@@ -6,6 +6,4 @@ RUN touch /var/run/nginx.pid && \
     chown -R nginx:nginx /var/run/nginx.pid && \
     chown -R nginx:nginx /var/cache/nginx
 
-VOLUME [ "/var/run/satymathbot" ]
-
 USER nginx

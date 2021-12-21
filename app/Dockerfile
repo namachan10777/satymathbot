@@ -36,9 +36,9 @@ COPY --from=satysfi-builder /home/opam/.opam/4.10/share/satysfi /home/opam/.opam
 
 RUN groupadd -g 101 satymathbot
 RUN useradd -rm -s /bin/bash -u 101 -g satymathbot satymathbot
-USER satymathbot
-
+RUN mkdir -p /var/run/satymathbot && chown satymathbot:satymathbot /var/run/satymathbot
 VOLUME [ "/var/run/satymathbot" ]
+USER satymathbot
 
 ENTRYPOINT [ "/usr/local/bin/satymathbot" ]
 CMD [ "-s", "/etc/satymathbot/config.ron" ]
