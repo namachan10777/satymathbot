@@ -45,7 +45,7 @@ locals {
 }
 
 locals {
-  repositories = toset(["app", "nginx", "envoy", "satysfi"])
+  repositories = toset(["app", "nginx", "envoy"])
 }
 
 resource "aws_ecr_repository" "satymathbot" {

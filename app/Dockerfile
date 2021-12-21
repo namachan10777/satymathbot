@@ -1,4 +1,18 @@
-FROM 966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-satysfi:latest as satysfi-builder
+FROM ocaml/opam:ubuntu-21.04-ocaml-4.10 as satysfi-builder
+RUN opam repository add satysfi-external https://github.com/gfngfn/satysfi-external-repo.git
+RUN opam repository add satyrographos https://github.com/na4zagin3/satyrographos-repo.git
+RUN opam update
+
+USER root
+RUN apt-get update && apt-get install -y pkg-config
+
+USER opam
+RUN opam install -y satysfi satysfi-dist satyrographos
+RUN opam exec -- satyrographos install
+
+USER root
+RUN cp /home/opam/.opam/4.10/bin/satysfi /usr/local/bin/satysfi
+
 FROM public.ecr.aws/docker/library/rust:latest as satymathbot-builder
 WORKDIR /work
 COPY Cargo.lock /work/Cargo.lock

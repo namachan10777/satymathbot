@@ -246,6 +246,7 @@ async fn main() {
                         error!("copy satyh file {} to {} due to {}", from, to, e)
                     }
                 }
+                info!("exiting accidently");
                 exit(-1);
             }
         }
