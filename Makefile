@@ -29,7 +29,7 @@ configtest: docker-compose-validate.yml
 	docker-compose -f $< down
 	docker-compose -f $< up --build -d
 	docker-compose -f $< exec -T nginx nginx -t
-	docker-compose -f $< exec -T envoy /opt/bitnami/envoy/bin/envoy --mode validate --config-path /etc/envoy/envoy.yml
+	docker-compose -f $< exec -T envoy /usr/local/bin/envoy --mode validate --config-path /etc/envoy/envoy.yml
 	docker-compose -f $< down
 
 .PHONY: clean
