@@ -41,5 +41,7 @@ RUN chown satymathbot:satymathbot /var/run/satymathbot
 RUN chmod 700 /var/run/satymathbot
 USER satymathbot
 
+VOLUME [ "/var/run/satymathbot" ]
+
 ENTRYPOINT [ "/usr/local/bin/satymathbot" ]
 CMD [ "-s", "/etc/satymathbot/config.ron" ]
