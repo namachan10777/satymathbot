@@ -9,11 +9,16 @@ local logConfiguration = {
     'awslogs-stream-prefix': 'satymathbot',
   },
 };
+local mountpoint = {
+  containerPath: '/var/run/satymathbot',
+  sourceVolume: 'sock',
+};
 
 local component(name) = {
   name: name,
   image: image(name),
   logConfiguration: logConfiguration,
+  mountpoints: [mountpoint],
 };
 
 [

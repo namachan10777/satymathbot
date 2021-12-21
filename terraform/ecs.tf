@@ -79,6 +79,9 @@ resource "aws_ecs_task_definition" "main" {
     operating_system_family = "LINUX"
     cpu_architecture        = "ARM64"
   }
+  volume {
+    name = "sock"
+  }
 }
 
 data "aws_iam_policy_document" "ecs-assume-role" {
