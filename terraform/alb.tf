@@ -1,7 +1,7 @@
 resource "aws_security_group" "alb" {
   name        = "satymathbot-alb"
   description = "Allow https access"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = data.aws_vpc.main.id
 
   ingress {
     description      = "http from anywhere"
@@ -23,11 +23,10 @@ resource "aws_security_group" "alb" {
 
 resource "aws_alb" "main" {
   name               = "satymathbot"
-  depends_on         = [aws_route_table_association.public]
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
-  subnets            = [for subnet in aws_subnet.public : subnet.id]
+  subnets            = [for subnet in data.aws_subnet.public : subnet.id]
   ip_address_type    = "dualstack"
 
   enable_deletion_protection = true
@@ -37,7 +36,7 @@ resource "aws_lb_target_group" "main" {
   name        = "satymathbot"
   port        = 8080
   protocol    = "HTTP"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = data.aws_vpc.main.id
   target_type = "ip"
   health_check {
     port     = 8080

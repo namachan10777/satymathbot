@@ -1,12 +1,12 @@
 resource "aws_security_group" "ecs" {
   name   = "satymathbot-ecs"
-  vpc_id = aws_vpc.main.id
+  vpc_id = data.aws_vpc.main.id
   ingress {
     from_port        = 8080
     to_port          = 8080
     protocol         = "tcp"
-    cidr_blocks      = [for subnet in aws_subnet.public : subnet.cidr_block]
-    ipv6_cidr_blocks = [for subnet in aws_subnet.public : subnet.ipv6_cidr_block]
+    cidr_blocks      = [for subnet in data.aws_subnet.public : subnet.cidr_block]
+    ipv6_cidr_blocks = [for subnet in data.aws_subnet.public : subnet.ipv6_cidr_block]
   }
 
   egress {
@@ -108,7 +108,7 @@ resource "aws_ecs_service" "main" {
   task_definition = aws_ecs_task_definition.main.arn
   depends_on      = [aws_alb.main]
   network_configuration {
-    subnets          = [for subnet in aws_subnet.public : subnet.id]
+    subnets          = [for subnet in data.aws_subnet.public : subnet.id]
     security_groups  = [aws_security_group.ecs.id]
     assign_public_ip = true
   }
