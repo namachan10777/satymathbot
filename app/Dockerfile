@@ -31,8 +31,7 @@ COPY ./satysfi/empty.satyh /etc/satymathbot/empty.satyh
 COPY ./prod.ron /etc/satymathbot/config.ron
 COPY --from=satysfi-builder /usr/local/bin/satysfi /usr/local/bin/satysfi
 COPY --from=satymathbot-builder /work/target/release/satymathbot /usr/local/bin/satymathbot
-COPY --from=satysfi-builder /home/opam/.satysfi /home/satymathbot/.satysfi
-COPY --from=satysfi-builder /home/opam/.opam/4.10/share/satysfi /home/opam/.opam/4.10/share/satysfi
+COPY --from=satysfi-builder /home/opam/.opam/4.10/share/satysfi /.satysfi
 COPY ./entry.sh /usr/local/bin/entry.sh
 
 RUN groupadd -g 101 satymathbot && useradd -rm -s /bin/bash -u 101 -g satymathbot satymathbot
