@@ -1,0 +1,23 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+client:
+  url: http://ip-172-16-1-240.ap-northeast-1.compute.internal:3100/api/prom/push
+
+scrape_configs:
+  - job_name: application
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx
+          __path__: /var/run/satymathbot/nginx.log
+      - targets:
+          - localhost
+        labels:
+          job: envoy
+          __path__: /var/run/satymathbot/envoy.log

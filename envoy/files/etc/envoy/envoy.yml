@@ -13,6 +13,22 @@ static_resources:
           '@type': type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
           stat_prefix: ingress_http
           codec_type: AUTO
+          access_log:
+            - name: envoy.access_loggers.file
+              typed_config:
+                '@type': type.googleapis.com/envoy.extensions.access_loggers.file.v3.FileAccessLog
+                path: /dev/stdout
+            - name: envoy.access_loggers.file
+              typed_config:
+                '@type': type.googleapis.com/envoy.extensions.access_loggers.file.v3.FileAccessLog
+                typed_json_format:
+                  ua: "%REQ(USER-AGENT)%"
+                  method: "%REQ(:METHOD)%"
+                  path: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
+                  res: "%RESPONSE_CODE%"
+                  id: "%REQ(X-REQUEST-ID)%"
+                  upstream: "%UPSTREAM_HOST%"
+                path: /var/run/satymathbot/envoy.log
           route_config:
             name: satymathbot
             virtual_hosts:
