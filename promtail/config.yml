@@ -6,7 +6,7 @@ positions:
   filename: /tmp/positions.yaml
 
 client:
-  url: http://ip-172-16-1-240.ap-northeast-1.compute.internal:3100/api/prom/push
+  url: http://172.16.1.240:3100/api/prom/push
 
 scrape_configs:
   - job_name: application
