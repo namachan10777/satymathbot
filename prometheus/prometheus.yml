@@ -17,4 +17,5 @@ remote_write:
       max_samples_per_send: 1000
       max_shards: 200
       capacity: 2500
-    sigv4: {}
+    sigv4:
+      region: ap-northeast-1
