@@ -185,7 +185,6 @@ async fn run_app_server(sock: &SockInfo, cfg: satymathbot::Config) -> Result<(),
     let state = Arc::new(satymathbot::State::new(cfg));
     let app = axum::Router::new()
         .route("/:file", routing::get(satymathbot::endpoint))
-        .route("/health", routing::get(health))
         .layer(axum::AddExtensionLayer::new(state));
     run_hyper_server(sock, app).await
 }

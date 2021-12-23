@@ -39,8 +39,8 @@ resource "aws_lb_target_group" "main" {
   vpc_id      = data.aws_vpc.main.id
   target_type = "ip"
   health_check {
-    port     = 8080
-    path     = "/health"
+    port     = 8081
+    path     = "/"
     timeout  = 10
     interval = 30
   }

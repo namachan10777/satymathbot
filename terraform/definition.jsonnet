@@ -55,6 +55,10 @@ local depends(name) = {
         containerPort: 8080,
       },
       {
+        hostPort: 8081,
+        containerPort: 8081,
+      },
+      {
         hostPort: 9901,
         containerPort: 9901,
       },

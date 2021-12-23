@@ -14,7 +14,4 @@ RUN touch /var/run/nginx.pid && \
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY --from=builder /work/build /web
 
-USER root
-RUN apt-get update && apt-get install -y fish
-
 USER nginx
