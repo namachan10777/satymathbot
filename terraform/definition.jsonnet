@@ -1,4 +1,4 @@
-local revision = '8490d9a4e4012a075da764d56de8b3f3beffb694';
+local revision = '8832d5aebe225321f9cf67539c09e8522d7a94bc';
 local image(component) = '966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-' + component + ':' + revision;
 local logConfiguration = {
   logDriver: 'awslogs',
@@ -30,6 +30,7 @@ local depends(name) = {
   component('nginx') {
     dependsOn: [depends('app')],
   },
+  component('prometheus'),
   component('promtail') {
     dependsOn: [depends('app')],
   },

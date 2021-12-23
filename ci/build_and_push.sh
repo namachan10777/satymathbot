@@ -3,7 +3,7 @@
 set -eux
 
 ECR_REGISTRY="966924987919.dkr.ecr.ap-northeast-1.amazonaws.com"
-REPOS=("nginx" "envoy" "app" "promtail")
+REPOS=("nginx" "envoy" "app" "promtail" "prometheus")
 
 function build_and_push {
     local repo="${ECR_REGISTRY}/satymathbot-$1"
