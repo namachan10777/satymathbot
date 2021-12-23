@@ -1,0 +1,14 @@
+{
+  "0 debug pnpm:scope": {
+    "selected": 1
+  },
+  "1 error pnpm": {
+    "code": "ERR_PNPM_NO_SCRIPT",
+    "err": {
+      "name": "pnpm",
+      "message": "Missing script: build",
+      "code": "ERR_PNPM_NO_SCRIPT",
+      "stack": "pnpm: Missing script: build\n    at Object.handler (/Users/namachan/.npm-packages/lib/node_modules/pnpm/dist/pnpm.cjs:179459:15)\n    at async /Users/namachan/.npm-packages/lib/node_modules/pnpm/dist/pnpm.cjs:183649:21\n    at async run (/Users/namachan/.npm-packages/lib/node_modules/pnpm/dist/pnpm.cjs:183623:34)\n    at async runPnpm (/Users/namachan/.npm-packages/lib/node_modules/pnpm/dist/pnpm.cjs:183835:5)\n    at async /Users/namachan/.npm-packages/lib/node_modules/pnpm/dist/pnpm.cjs:183827:7"
+    }
+  }
+}

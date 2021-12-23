@@ -1,4 +1,4 @@
-local revision = '1aa997a94e97495a8ad55f62b3f2d78207d0ae64';
+local revision = 'c2e8d73b8e1c42cbfb5ef07a5a7f518d5e2ea145';
 local account_id = 966924987919;
 local image(component) = account_id + '.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-' + component + ':' + revision;
 local logConfiguration = {
@@ -28,7 +28,7 @@ local depends(name) = {
 };
 
 [
-  component('nginx') {
+  component('web') {
     dependsOn: [depends('app')],
   },
   component('prometheus') {
@@ -59,7 +59,7 @@ local depends(name) = {
         containerPort: 9901,
       },
     ],
-    dependsOn: [depends('nginx')],
+    dependsOn: [depends('web')],
   },
   component('app'),
 ]
