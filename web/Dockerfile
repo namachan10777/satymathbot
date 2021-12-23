@@ -1,8 +1,10 @@
 FROM public.ecr.aws/docker/library/node:stretch-slim as builder
 RUN npm i -g pnpm
 WORKDIR /work
-COPY . /work
+COPY package.json /work/
+COPY pnpm-lock.yaml /work/
 RUN pnpm i
+COPY . /work
 RUN pnpm build
 
 FROM public.ecr.aws/docker/library/nginx:1.21.4
