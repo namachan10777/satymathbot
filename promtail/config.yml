@@ -23,7 +23,7 @@ scrape_configs:
           __path__: /var/run/satymathbot/envoy.log
     pipeline_stages:
       - match:
-          selecter: '{job="envoy"}'
+          selector: '{job="envoy"}'
           stages:
             - json:
                 expressions:
