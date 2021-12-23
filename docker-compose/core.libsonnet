@@ -15,7 +15,7 @@
     },
     envoy: {
       build: './envoy',
-      ports: ['8080:8080', '9901:9901'],
+      ports: ['8080:8080', '9901:9901', '8081:8081'],
       volumes: [
         'sock:/var/run/satymathbot'
       ],

@@ -8,6 +8,13 @@ resource "aws_security_group" "ecs" {
     cidr_blocks      = [for subnet in data.aws_subnet.public : subnet.cidr_block]
     ipv6_cidr_blocks = [for subnet in data.aws_subnet.public : subnet.ipv6_cidr_block]
   }
+  ingress {
+    from_port        = 8081
+    to_port          = 8081
+    protocol         = "tcp"
+    cidr_blocks      = [for subnet in data.aws_subnet.public : subnet.cidr_block]
+    ipv6_cidr_blocks = [for subnet in data.aws_subnet.public : subnet.ipv6_cidr_block]
+  }
 
   egress {
     from_port        = 0
