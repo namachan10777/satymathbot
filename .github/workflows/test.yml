@@ -42,5 +42,4 @@ jobs:
     - name: Clippy
       run: cargo clippy -- -D warnings
       working-directory: app
-    - name: config validate
-      run: make configtest
+
