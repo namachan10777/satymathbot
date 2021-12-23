@@ -46,7 +46,7 @@ resource "aws_iam_role_policy_attachment" "ecs-execution-default" {
   policy_arn = data.aws_iam_policy.amazon-ecs-task-execution-role-policy.arn
 }
 
-data "aws_iam_policy_document" "ecs-task-execution-awslogs" {
+data "aws_iam_policy_document" "ecs-task-execution" {
   statement {
     actions = [
       "logs:CreateLogGroup",
@@ -60,11 +60,19 @@ data "aws_iam_policy_document" "ecs-task-execution-awslogs" {
     ]
     resources = ["arn:aws:logs:ap-northeast-1:966924987919:log-group:satymathbot:*"]
   }
+  statement {
+    actions = [
+      "ssm:GetParameters",
+    ]
+    resources = [
+      aws_ssm_parameter.prometheus-writer.arn,
+    ]
+  }
 }
 resource "aws_iam_role_policy" "ecs-execution-awslogs" {
   name   = "EcsTaskExecutionAwslogs"
   role   = aws_iam_role.ecs-execution.id
-  policy = data.aws_iam_policy_document.ecs-task-execution-awslogs.json
+  policy = data.aws_iam_policy_document.ecs-task-execution.json
 }
 
 resource "aws_ecs_task_definition" "main" {
@@ -75,6 +83,7 @@ resource "aws_ecs_task_definition" "main" {
   network_mode             = "awsvpc"
   container_definitions    = file("definition.json")
   execution_role_arn       = aws_iam_role.ecs-execution.arn
+  task_role_arn            = aws_iam_role.ecs.arn
   runtime_platform {
     operating_system_family = "LINUX"
     cpu_architecture        = "ARM64"
@@ -96,8 +105,33 @@ data "aws_iam_policy_document" "ecs-assume-role" {
 
 
 resource "aws_iam_role" "ecs" {
-  name               = "satymathbot-ecs"
+  name               = "SatymathbotEcs"
   assume_role_policy = data.aws_iam_policy_document.ecs-assume-role.json
+}
+
+resource "aws_iam_user" "prometheus-writer" {
+  name = "SatymathbotPrometheusWriter"
+  path = "/prometheus/"
+}
+
+resource "aws_iam_access_key" "prometheus-writer" {
+  user = aws_iam_user.prometheus-writer.name
+}
+
+output "prometheus-writer-access-key-id" {
+  value = aws_iam_access_key.prometheus-writer.id
+}
+
+resource "aws_iam_policy_attachment" "prometheus-writer" {
+  name       = "SatymathbotPrometheusWrite"
+  users      = [aws_iam_user.prometheus-writer.name]
+  policy_arn = "arn:aws:iam::aws:policy/AmazonPrometheusRemoteWriteAccess"
+}
+
+resource "aws_ssm_parameter" "prometheus-writer" {
+  name  = "/satymathbot/prometheus-writer/access-key"
+  type  = "String"
+  value = aws_iam_access_key.prometheus-writer.secret
 }
 
 resource "aws_ecs_service" "main" {

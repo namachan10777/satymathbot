@@ -1,5 +1,6 @@
 local revision = 'e26c81705757f4b5ac439adb43ae53a3769a0ed4';
-local image(component) = '966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-' + component + ':' + revision;
+local account_id = 966924987919;
+local image(component) = account_id + '.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-' + component + ':' + revision;
 local logConfiguration = {
   logDriver: 'awslogs',
   options: {
@@ -30,7 +31,20 @@ local depends(name) = {
   component('nginx') {
     dependsOn: [depends('app')],
   },
-  component('prometheus'),
+  component('prometheus') {
+    environment: [
+      {
+        name: 'AWS_ACCESS_KEY_ID',
+        value: 'AKIA6CIJYNYHWKA6DW4P',
+      },
+    ],
+    secrets: [
+      {
+        name: 'AWS_SECRET_ACCESS_KEY',
+        valueFrom: 'arn:aws:ssm:ap-northeast-1:' + account_id + ':parameter/satymathbot/prometheus-writer/access-key',
+      },
+    ],
+  },
   component('promtail') {
     dependsOn: [depends('app')],
   },
