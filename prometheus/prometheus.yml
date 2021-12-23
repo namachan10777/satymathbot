@@ -13,3 +13,9 @@ scrape_configs:
 remote_write:
   - url: https://aps-workspaces.ap-northeast-1.amazonaws.com/workspaces/ws-6c490abc-a1c9-4546-a847-275b93ae6547/api/v1/remote_write
     remote_timeout: 30s
+    queue_config:
+        max_samples_per_send: 1000
+        max_shards: 200
+        capacity: 2500
+    sigv4:
+         region: ap-northeast-1
