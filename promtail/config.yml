@@ -10,6 +10,26 @@ client:
 
 scrape_configs:
   - job_name: application
+    pipeline_stages:
+      - match:
+        selecter: '{job="envoy"}'
+        stages:
+          - json:
+              expressions:
+                upstream: upstream
+                id: id
+                ua: ua
+                path: path
+                method: method
+                res: res
+          - labels:
+              upstream:
+              id:
+              ua:
+              path:
+              method:
+              res:
+
     static_configs:
       - targets:
           - localhost
