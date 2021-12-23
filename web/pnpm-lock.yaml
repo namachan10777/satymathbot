@@ -4,6 +4,7 @@ specifiers:
   '@fontsource/fira-mono': 4.5.0
   '@lukeed/uuid': 2.0.0
   '@sveltejs/adapter-auto': next
+  '@sveltejs/adapter-node': ^1.0.0-next.56
   '@sveltejs/kit': next
   '@types/cookie': 0.4.1
   '@typescript-eslint/eslint-plugin': 5.8.0
@@ -23,6 +24,7 @@ specifiers:
 dependencies:
   '@fontsource/fira-mono': 4.5.0
   '@lukeed/uuid': 2.0.0
+  '@sveltejs/adapter-node': 1.0.0-next.56
   cookie: 0.4.1
 
 devDependencies:
@@ -145,6 +147,13 @@ packages:
       '@iarna/toml': 2.2.5
       esbuild: 0.13.15
     dev: true
+
+  /@sveltejs/adapter-node/1.0.0-next.56:
+    resolution: {integrity: sha512-NY3CFUeczH/1g3rOtq9blHJ4Am99ZiUVVDibioD5GFctBH27TDVeZrpssGWngD0Ybkojpl8fXR7mTZZdOEx9qg==}
+    dependencies:
+      esbuild: 0.13.15
+      tiny-glob: 0.2.9
+    dev: false
 
   /@sveltejs/adapter-vercel/1.0.0-next.32:
     resolution: {integrity: sha512-ZcltaS5bAobGD5P0z7xJIjPHSlGpF7padMIkqTzJxwMEb/acGgdO5yzDS8XUEaSNgj+prpD2oG8+gm33ds8x0A==}
@@ -520,7 +529,6 @@ packages:
     cpu: [arm64]
     os: [android]
     requiresBuild: true
-    dev: true
     optional: true
 
   /esbuild-darwin-64/0.13.15:
@@ -528,7 +536,6 @@ packages:
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
-    dev: true
     optional: true
 
   /esbuild-darwin-arm64/0.13.15:
@@ -536,7 +543,6 @@ packages:
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
-    dev: true
     optional: true
 
   /esbuild-freebsd-64/0.13.15:
@@ -544,7 +550,6 @@ packages:
     cpu: [x64]
     os: [freebsd]
     requiresBuild: true
-    dev: true
     optional: true
 
   /esbuild-freebsd-arm64/0.13.15:
@@ -552,7 +557,6 @@ packages:
     cpu: [arm64]
     os: [freebsd]
     requiresBuild: true
-    dev: true
     optional: true
 
   /esbuild-linux-32/0.13.15:
@@ -560,7 +564,6 @@ packages:
     cpu: [ia32]
     os: [linux]
     requiresBuild: true
-    dev: true
     optional: true
 
   /esbuild-linux-64/0.13.15:
@@ -568,7 +571,6 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
-    dev: true
     optional: true
 
   /esbuild-linux-arm/0.13.15:
@@ -576,7 +578,6 @@ packages:
     cpu: [arm]
     os: [linux]
     requiresBuild: true
-    dev: true
     optional: true
 
   /esbuild-linux-arm64/0.13.15:
@@ -584,7 +585,6 @@ packages:
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
-    dev: true
     optional: true
 
   /esbuild-linux-mips64le/0.13.15:
@@ -592,7 +592,6 @@ packages:
     cpu: [mips64el]
     os: [linux]
     requiresBuild: true
-    dev: true
     optional: true
 
   /esbuild-linux-ppc64le/0.13.15:
@@ -600,7 +599,6 @@ packages:
     cpu: [ppc64]
     os: [linux]
     requiresBuild: true
-    dev: true
     optional: true
 
   /esbuild-netbsd-64/0.13.15:
@@ -608,7 +606,6 @@ packages:
     cpu: [x64]
     os: [netbsd]
     requiresBuild: true
-    dev: true
     optional: true
 
   /esbuild-openbsd-64/0.13.15:
@@ -616,7 +613,6 @@ packages:
     cpu: [x64]
     os: [openbsd]
     requiresBuild: true
-    dev: true
     optional: true
 
   /esbuild-sunos-64/0.13.15:
@@ -624,7 +620,6 @@ packages:
     cpu: [x64]
     os: [sunos]
     requiresBuild: true
-    dev: true
     optional: true
 
   /esbuild-windows-32/0.13.15:
@@ -632,7 +627,6 @@ packages:
     cpu: [ia32]
     os: [win32]
     requiresBuild: true
-    dev: true
     optional: true
 
   /esbuild-windows-64/0.13.15:
@@ -640,7 +634,6 @@ packages:
     cpu: [x64]
     os: [win32]
     requiresBuild: true
-    dev: true
     optional: true
 
   /esbuild-windows-arm64/0.13.15:
@@ -648,7 +641,6 @@ packages:
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
-    dev: true
     optional: true
 
   /esbuild/0.13.15:
@@ -673,7 +665,6 @@ packages:
       esbuild-windows-32: 0.13.15
       esbuild-windows-64: 0.13.15
       esbuild-windows-arm64: 0.13.15
-    dev: true
 
   /escape-string-regexp/4.0.0:
     resolution: {integrity: sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA==}
@@ -932,6 +923,10 @@ packages:
       type-fest: 0.20.2
     dev: true
 
+  /globalyzer/0.1.0:
+    resolution: {integrity: sha512-40oNTM9UfG6aBmuKxk/giHn5nQ8RVz/SS4Ir6zgzOv9/qC3kKZ9v4etGTcJbEl/NyVQH7FGU7d+X1egr57Md2Q==}
+    dev: false
+
   /globby/11.0.4:
     resolution: {integrity: sha512-9O4MVG9ioZJ08ffbcyVYyLOJLk5JQ688pJ4eMGLpdWLHq/Wr1D9BlriLQyL0E+jbkuePVZXYFj47QM/v093wHg==}
     engines: {node: '>=10'}
@@ -943,6 +938,10 @@ packages:
       merge2: 1.4.1
       slash: 3.0.0
     dev: true
+
+  /globrex/0.1.2:
+    resolution: {integrity: sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==}
+    dev: false
 
   /graceful-fs/4.2.8:
     resolution: {integrity: sha512-qkIilPUYcNhJpd33n0GBXTB1MMPp14TxEsEs0pTrsSVucApsYzW5V+Q8Qxhik6KU3evy+qkAAowTByymK0avdg==}
@@ -1477,6 +1476,13 @@ packages:
   /text-table/0.2.0:
     resolution: {integrity: sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=}
     dev: true
+
+  /tiny-glob/0.2.9:
+    resolution: {integrity: sha512-g/55ssRPUjShh+xkfx9UPDXqhckHEsHr4Vd9zX55oSdGZc/MD0m3sferOkwWtp98bv+kcVfEHtRJgBVJzelrzg==}
+    dependencies:
+      globalyzer: 0.1.0
+      globrex: 0.1.2
+    dev: false
 
   /to-regex-range/5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
