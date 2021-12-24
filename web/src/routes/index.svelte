@@ -3,28 +3,15 @@
 </script>
 
 <script lang="ts">
+	let math = "";
 </script>
 
 <svelte:head>
-	<title>SATyMathBot</title>
+	<title>Home</title>
 </svelte:head>
 
 <section>
-	<h1>
-		SATyMathBot
-	</h1>
+	<input type=text bind:value="{math}" />
 </section>
 
-<style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 1;
-	}
-
-	h1 {
-		width: 100%;
-	}
-</style>
+<style></style>
