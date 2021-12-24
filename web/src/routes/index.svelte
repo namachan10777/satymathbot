@@ -11,7 +11,17 @@
 		return `https://satymathbot.net/m/${base64Encode(src)}.png`;
 	}
 	function handleShow() {
-		imgSrc = makeMathUrl(math);
+		const url = makeMathUrl(math);
+		fetch(url, {  }).then((res) => {
+			if (res.url === url) {
+				res.blob().then((blob) => {
+					console.log(blob);
+					imgSrc = URL.createObjectURL(blob);
+				}).catch(err => {
+					console.log(err);
+				});
+			}
+		});
 	}
 	let math = '1+1';
 	let imgSrc = makeMathUrl(math);
