@@ -3,6 +3,16 @@
 </script>
 
 <script lang="ts">
+	type ImgState =
+		| {
+				state: 'success';
+				url: string;
+		  }
+		| {
+				state: 'error';
+				txt: string;
+		  };
+
 	function base64Encode(src: string) {
 		const binStr = unescape(encodeURIComponent(src));
 		return btoa(binStr);
@@ -10,21 +20,32 @@
 	function makeMathUrl(src: string) {
 		return `https://satymathbot.net/m/${base64Encode(src)}.png`;
 	}
+	let math = 'e^{i\\pi} + 1 = 0';
+	let mathURL = makeMathUrl(math);
+	let imgSrc: Promise<ImgState> = (async () => {
+		return { state: 'success', url: mathURL };
+	})();
 	function handleShow() {
 		const url = makeMathUrl(math);
-		fetch(url, {  }).then((res) => {
-			if (res.url === url) {
-				res.blob().then((blob) => {
-					console.log(blob);
-					imgSrc = URL.createObjectURL(blob);
-				}).catch(err => {
-					console.log(err);
-				});
+		mathURL = url;
+		async function request(): Promise<ImgState> {
+			const res = await fetch(url);
+			if (res.ok) {
+				const blob = await res.blob();
+				return {
+					state: 'success',
+					url: URL.createObjectURL(blob)
+				};
+			} else {
+				const txt = await res.text();
+				return {
+					state: 'error',
+					txt
+				};
 			}
-		});
+		}
+		imgSrc = request();
 	}
-	let math = 'e^{i\\pi} + 1 = 0';
-	let imgSrc = makeMathUrl(math);
 </script>
 
 <svelte:head>
@@ -35,7 +56,16 @@
 	<h1>SATyMathBot</h1>
 	<input type="text" bind:value={math} />
 	<button on:click={handleShow}>show</button>
-	<img src={imgSrc} alt={math} />
+	<p><span>{mathURL}</span></p>
+	{#await imgSrc}
+		<p>loading...</p>
+	{:then src}
+		{#if src.state === 'success'}
+			<img src={src.url} alt={mathURL} />
+		{:else}
+			<p>{src.txt}</p>
+		{/if}
+	{/await}
 </section>
 
 <style>
