@@ -25,4 +25,4 @@ ron = "0.7.0"
 serde = {version = "1.0.132", features = ["derive"]}
 tokio = {version = "1.15.0", features = ["macros", "fs", "process", "io-util", "rt-multi-thread", "signal"]}
 tracing = "0.1.29"
-tracing-subscriber = {version = "0.3.3", default-features = false, features = ["fmt"]}
+tracing-subscriber = {version = "0.3.4", default-features = false, features = ["fmt"]}
