@@ -23,7 +23,7 @@
 			}
 		});
 	}
-	let math = '1+1';
+	let math = 'e^{i\\pi} + 1 = 0';
 	let imgSrc = makeMathUrl(math);
 </script>
 
