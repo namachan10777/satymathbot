@@ -7,7 +7,7 @@
         'sock:/var/run/satymathbot'
       ],
     },
-    nginx: {
+    web: {
       build: './web',
       volumes: [
         'sock:/var/run/satymathbot'

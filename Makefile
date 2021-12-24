@@ -28,7 +28,7 @@ docker-compose-metrics: docker-compose-metrics.yml
 configtest: docker-compose-validate.yml
 	docker-compose -f $< down
 	docker-compose -f $< up --build -d
-	docker-compose -f $< exec -T nginx nginx -t
+	docker-compose -f $< exec -T web nginx -t
 	docker-compose -f $< exec -T envoy /usr/local/bin/envoy --mode validate --config-path /etc/envoy/envoy.yml
 	docker-compose -f $< down
 
