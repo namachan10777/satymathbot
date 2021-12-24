@@ -3,7 +3,18 @@
 </script>
 
 <script lang="ts">
-	let math = "";
+	function base64Encode(src: string) {
+		const binStr = unescape(encodeURIComponent(src));
+		return btoa(binStr);
+	}
+	function makeMathUrl(src: string) {
+		return `https://satymathbot.net/m/${base64Encode(src)}.png`;
+	}
+	function handleShow() {
+		imgSrc = makeMathUrl(math);
+	}
+	let math = '1+1';
+	let imgSrc = makeMathUrl(math);
 </script>
 
 <svelte:head>
@@ -11,7 +22,16 @@
 </svelte:head>
 
 <section>
-	<input type=text bind:value="{math}" />
+	<h1>SATyMathBot</h1>
+	<input type="text" bind:value={math} />
+	<button on:click={handleShow}>show</button>
+	<img src={imgSrc} alt={math} />
 </section>
 
-<style></style>
+<style>
+	section {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+</style>
