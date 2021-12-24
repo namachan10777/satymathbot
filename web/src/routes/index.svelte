@@ -46,6 +46,9 @@
 		}
 		imgSrc = request();
 	}
+	function handleCopy() {
+		navigator.clipboard.writeText(mathURL);
+	}
 </script>
 
 <svelte:head>
@@ -57,6 +60,7 @@
 	<input type="text" bind:value={math} />
 	<button on:click={handleShow}>show</button>
 	<p><span>{mathURL}</span></p>
+	<button on:click={handleCopy}>copy</button>
 	{#await imgSrc}
 		<p>loading...</p>
 	{:then src}
