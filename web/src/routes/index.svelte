@@ -52,11 +52,14 @@
 </script>
 
 <svelte:head>
-	<title>Home</title>
+	<title>SATyMathBot</title>
 </svelte:head>
 
 <section>
 	<h1>SATyMathBot</h1>
+	<p>
+		A formula rendering server driven by <a href="https://github.com/gfngfn/SATySFi">SATySFi</a>.
+	</p>
 	<input type="text" bind:value={math} />
 	<button on:click={handleShow}>show</button>
 	<pre>{mathURL}</pre>
