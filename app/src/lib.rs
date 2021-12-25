@@ -14,7 +14,7 @@ use tracing::warn;
 #[derive(Debug, PartialEq, Clone)]
 enum MathState {
     Error(String),
-    Ready(Vec<u8>),
+    Ready { png: Vec<u8>, jpeg: Vec<u8> },
 }
 
 #[derive(askama::Template)]
@@ -181,11 +181,18 @@ async fn handle(state: Arc<State>, query: Query) -> Result<MathState, Error> {
         let area =
             detect_rendered_area(&image).ok_or(Error::Internal(InternalError::MathUndetected))?;
         let image = image.crop_imm(area.x, area.y, area.w, area.h);
-        let mut image_buf = Vec::new();
+        let mut png_buf = Vec::new();
         image
-            .write_to(&mut image_buf, image::ImageOutputFormat::Png)
+            .write_to(&mut png_buf, image::ImageOutputFormat::Png)
             .map_err(|e| Error::Internal(InternalError::EncodePng(e)))?;
-        let result = MathState::Ready(image_buf);
+        let mut jpeg_buf = Vec::new();
+        image
+            .write_to(&mut jpeg_buf, image::ImageOutputFormat::Jpeg(200))
+            .map_err(|e| Error::Internal(InternalError::EncodePng(e)))?;
+        let result = MathState::Ready {
+            png: png_buf,
+            jpeg: jpeg_buf,
+        };
         state
             .math
             .lock()
@@ -214,14 +221,17 @@ pub async fn prepare(style_file: &str, workdir: &str) -> Result<(), PrepareError
         .map_err(|e| PrepareError::CopySatyh(style_file.to_owned(), to, e))
 }
 
+#[derive(Clone)]
 enum Query {
     Png(String),
+    Jpeg(String),
 }
 
 impl Query {
     fn base64(&self) -> &str {
         match self {
             Query::Png(inner) => inner.as_str(),
+            Query::Jpeg(inner) => inner.as_str(),
         }
     }
 }
@@ -232,6 +242,7 @@ pub async fn endpoint(
 ) -> impl IntoResponse {
     let query = match file_name.rsplit_once('.') {
         Some((base64, "png")) => Query::Png(base64.to_owned()),
+        Some((base64, "jpg" | "jpeg")) => Query::Jpeg(base64.to_owned()),
         _ => {
             let mut headers = HeaderMap::new();
             headers.append("Content-Type", HeaderValue::from_static("text/plain"));
@@ -242,18 +253,23 @@ pub async fn endpoint(
             );
         }
     };
-    match handle(state, query).await {
-        Ok(MathState::Ready(img)) => {
+    match (handle(state, query.clone()).await, query) {
+        (Ok(MathState::Ready { png, jpeg: _ }), Query::Png(_)) => {
             let mut headers = HeaderMap::new();
             headers.append("Content-Type", HeaderValue::from_static("image/png"));
-            (StatusCode::ACCEPTED, headers, img)
+            (StatusCode::ACCEPTED, headers, png)
         }
-        Ok(MathState::Error(errmsg)) => {
+        (Ok(MathState::Ready { png: _, jpeg }), Query::Jpeg(_)) => {
+            let mut headers = HeaderMap::new();
+            headers.append("Content-Type", HeaderValue::from_static("image/jpeg"));
+            (StatusCode::ACCEPTED, headers, jpeg)
+        }
+        (Ok(MathState::Error(errmsg)), _) => {
             let mut headers = HeaderMap::new();
             headers.append("Content-Type", HeaderValue::from_static("text/plain"));
             (StatusCode::BAD_REQUEST, headers, errmsg.as_bytes().to_vec())
         }
-        Err(Error::BadRequest(e)) => {
+        (Err(Error::BadRequest(e)), _) => {
             let mut headers = HeaderMap::new();
             headers.append("Content-Type", HeaderValue::from_static("text/plain"));
             (
@@ -262,7 +278,7 @@ pub async fn endpoint(
                 format!("Error: {:?}", e).as_bytes().to_vec(),
             )
         }
-        Err(Error::Internal(e)) => {
+        (Err(Error::Internal(e)), _) => {
             warn!("{:?}", e);
             let mut headers = HeaderMap::new();
             headers.append("Content-Type", HeaderValue::from_static("text/plain"));
