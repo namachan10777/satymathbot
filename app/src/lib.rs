@@ -2,7 +2,7 @@ use askama::Template;
 use axum::extract::{Extension, Path};
 use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
-use image::{DynamicImage, GenericImageView, ImageOutputFormat, Pixel};
+use image::{DynamicImage, GenericImage, GenericImageView, ImageOutputFormat, Pixel, Rgba};
 use moka::future::Cache;
 use std::process::ExitStatus;
 use std::string;
@@ -106,6 +106,18 @@ fn detect_rendered_area(image: &DynamicImage) -> Option<Area> {
     }
 }
 
+fn alpha(img: &mut DynamicImage) {
+    let (w, h) = img.dimensions();
+    for x in 0..w {
+        for y in 0..h {
+            let Rgba([r, g, b, a]) = img.get_pixel_mut(x, y);
+            let darkness =
+                ((*r * *r + *g * *g + *b * *b) as f64).sqrt() / (255.0 * 255.0 * 3.0_f64).sqrt();
+            *a = (255.0 * darkness) as u8;
+        }
+    }
+}
+
 async fn handle(state: Arc<State>, query: Query) -> Result<MathState, Arc<Error>> {
     let base64_math = query.base64();
     let math = base64::decode_config(&base64_math, base64::URL_SAFE)
@@ -167,7 +179,8 @@ async fn handle(state: Arc<State>, query: Query) -> Result<MathState, Arc<Error>
             .map_err(|e| Error::Internal(InternalError::DecodePng(e)))?;
         let area =
             detect_rendered_area(&image).ok_or(Error::Internal(InternalError::MathUndetected))?;
-        let img = image.crop_imm(area.x, area.y, area.w, area.h);
+        let mut img = image.crop_imm(area.x, area.y, area.w, area.h);
+        alpha(&mut img);
         Ok(MathState::Ready { img })
     };
     state
