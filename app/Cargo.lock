@@ -1205,6 +1205,7 @@ dependencies = [
  "hyperlocal",
  "image",
  "moka",
+ "nom",
  "ron",
  "serde",
  "tokio",

@@ -9,7 +9,6 @@ use std::string;
 use std::sync::Arc;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::{fs, io, process};
-use tracing::warn;
 
 #[derive(Debug, PartialEq, Clone)]
 enum MathState {
@@ -106,6 +105,67 @@ fn detect_rendered_area(image: &DynamicImage) -> Option<Area> {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
+struct TextColor {
+    r: u8,
+    g: u8,
+    b: u8,
+}
+
+use nom::bytes::complete::take_while_m_n;
+use nom::combinator::map_res;
+use nom::sequence::tuple;
+use nom::IResult;
+
+fn from_hex(input: &str) -> Result<u8, std::num::ParseIntError> {
+    u8::from_str_radix(input, 16)
+}
+
+fn is_hex_digit(c: char) -> bool {
+    c.is_digit(16)
+}
+
+fn hex_primary(input: &str) -> IResult<&str, u8> {
+    map_res(take_while_m_n(2, 2, is_hex_digit), from_hex)(input)
+}
+
+fn hex_short(input: &str) -> IResult<&str, u8> {
+    map_res(take_while_m_n(1, 1, is_hex_digit), from_hex)(input)
+}
+
+impl TextColor {
+    fn parse_from_str(src: &str) -> Option<Self> {
+        if let Ok((_, (r, g, b))) = tuple((hex_primary, hex_primary, hex_primary))(src) {
+            Some(Self { r, g, b })
+        } else if let Ok((_, (r, g, b))) = tuple((hex_short, hex_short, hex_short))(src) {
+            Some(Self { r, g, b })
+        } else {
+            None
+        }
+    }
+
+    fn invert(self) -> Self {
+        Self {
+            r: 255 - self.r,
+            g: 255 - self.g,
+            b: 255 - self.b,
+        }
+    }
+}
+
+fn convert(img: &mut DynamicImage, to: TextColor) {
+    let (w, h) = img.dimensions();
+    for x in 0..w {
+        for y in 0..h {
+            let to_inv = to.invert();
+            let Rgba([r, g, b, a]) = img.get_pixel_mut(x, y);
+            *r = 255 - (to_inv.r as f64 * (*a as f64 / 255.0)) as u8;
+            *g = 255 - (to_inv.g as f64 * (*a as f64 / 255.0)) as u8;
+            *b = 255 - (to_inv.b as f64 * (*a as f64 / 255.0)) as u8;
+        }
+    }
+}
+
 fn alpha(img: &mut DynamicImage) {
     let (w, h) = img.dimensions();
     for x in 0..w {
@@ -194,6 +254,12 @@ pub enum PrepareError {
     CopySatyh(String, String, io::Error),
 }
 
+#[derive(serde::Deserialize)]
+pub struct URLQuery {
+    #[serde(default)]
+    color: Option<String>,
+}
+
 pub async fn prepare(style_file: &str, workdir: &str) -> Result<(), PrepareError> {
     let path = std::path::Path::new(workdir);
     if !path.exists() {
@@ -223,81 +289,70 @@ impl Query {
     }
 }
 
+fn text_response(src: &str, status: StatusCode) -> (StatusCode, HeaderMap, Vec<u8>) {
+    let mut headers = HeaderMap::new();
+    headers.append("Content-Type", HeaderValue::from_static("text/plain"));
+    (status, headers, src.as_bytes().to_vec())
+}
+
+fn image_response(
+    mut img: DynamicImage,
+    color: TextColor,
+    mime: &'static str,
+    format: ImageOutputFormat,
+) -> (StatusCode, HeaderMap, Vec<u8>) {
+    let mut png = Vec::new();
+    convert(&mut img, color);
+    if let Err(e) = img.write_to(&mut png, format) {
+        return text_response(
+            &format!("failed to encode png: {:?}", e),
+            StatusCode::INTERNAL_SERVER_ERROR,
+        );
+    }
+    let mut headers = HeaderMap::new();
+    headers.append("Content-Type", HeaderValue::from_static(mime));
+    (StatusCode::OK, headers, png)
+}
+
 pub async fn endpoint(
     Extension(state): Extension<Arc<State>>,
+    axum::extract::Query(params): axum::extract::Query<URLQuery>,
     Path(file_name): Path<String>,
 ) -> impl IntoResponse {
     let query = match file_name.rsplit_once('.') {
         Some((base64, "png")) => Query::Png(base64.to_owned()),
         Some((base64, "jpg" | "jpeg")) => Query::Jpeg(base64.to_owned()),
         _ => {
-            let mut headers = HeaderMap::new();
-            headers.append("Content-Type", HeaderValue::from_static("text/plain"));
-            return (
+            return text_response(
+                "filename with unsupported extension",
                 StatusCode::BAD_REQUEST,
-                headers,
-                "filename with unsupported extension".as_bytes().to_vec(),
-            );
+            )
         }
+    };
+    let color = params.color.unwrap_or_else(|| "FFF".to_owned());
+    let color = if let Some(color) = TextColor::parse_from_str(&color) {
+        color
+    } else {
+        return text_response("invalid color specification", StatusCode::BAD_REQUEST);
     };
     match handle(state, query.clone()).await {
         Ok(result) => match (result, query) {
             (MathState::Ready { img }, Query::Png(_)) => {
-                let mut png = Vec::new();
-                if let Err(e) = img.write_to(&mut png, ImageOutputFormat::Png) {
-                    let mut headers = HeaderMap::new();
-                    headers.append("Content-Type", HeaderValue::from_static("text/plain"));
-                    return (
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                        headers,
-                        format!("failed to encode png: {}", e).as_bytes().to_vec(),
-                    );
-                }
-                let mut headers = HeaderMap::new();
-                headers.append("Content-Type", HeaderValue::from_static("image/png"));
-                (StatusCode::ACCEPTED, headers, png)
+                image_response(img, color, "image/png", ImageOutputFormat::Png)
             }
             (MathState::Ready { img }, Query::Jpeg(_)) => {
-                let mut jpeg = Vec::new();
-                if let Err(e) = img.write_to(&mut jpeg, ImageOutputFormat::Jpeg(200)) {
-                    let mut headers = HeaderMap::new();
-                    headers.append("Content-Type", HeaderValue::from_static("text/plain"));
-                    return (
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                        headers,
-                        format!("failed to encode jpeg: {}", e).as_bytes().to_vec(),
-                    );
-                }
-                let mut headers = HeaderMap::new();
-                headers.append("Content-Type", HeaderValue::from_static("image/jpeg"));
-                (StatusCode::ACCEPTED, headers, jpeg)
+                image_response(img, color, "image/jpeg", ImageOutputFormat::Jpeg(200))
             }
-            (MathState::Error(errmsg), _) => {
-                let mut headers = HeaderMap::new();
-                headers.append("Content-Type", HeaderValue::from_static("text/plain"));
-                (StatusCode::BAD_REQUEST, headers, errmsg.as_bytes().to_vec())
-            }
+            (MathState::Error(errmsg), _) => text_response(&errmsg, StatusCode::BAD_REQUEST),
         },
         Err(e) => match e.as_ref() {
             Error::BadRequest(e) => {
-                let mut headers = HeaderMap::new();
-                headers.append("Content-Type", HeaderValue::from_static("text/plain"));
-                (
-                    StatusCode::BAD_REQUEST,
-                    headers,
-                    format!("Error: {:?}", e).as_bytes().to_vec(),
-                )
+                text_response(&format!("Error: {:?}", e), StatusCode::BAD_REQUEST)
             }
-            Error::Internal(e) => {
-                warn!("{:?}", e);
-                let mut headers = HeaderMap::new();
-                headers.append("Content-Type", HeaderValue::from_static("text/plain"));
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    headers,
-                    format!("Error: {:?}", e).as_bytes().to_vec(),
-                )
-            }
+            Error::Internal(e) => text_response(
+                &format!("Error: {:?}", e),
+                StatusCode::INTERNAL_SERVER_ERROR,
+            ),
         },
     }
 }
