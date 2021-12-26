@@ -2,7 +2,7 @@ use askama::Template;
 use axum::extract::{Extension, Path};
 use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
-use image::{DynamicImage, GenericImageView, Pixel};
+use image::{DynamicImage, GenericImageView, ImageOutputFormat, Pixel};
 use moka::future::Cache;
 use std::process::ExitStatus;
 use std::string;
@@ -14,7 +14,7 @@ use tracing::warn;
 #[derive(Debug, PartialEq, Clone)]
 enum MathState {
     Error(String),
-    Ready { png: Vec<u8>, jpeg: Vec<u8> },
+    Ready { img: DynamicImage },
 }
 
 #[derive(askama::Template)]
@@ -55,7 +55,6 @@ enum InternalError {
     OpenPng(io::Error),
     ReadPng(io::Error),
     DecodePng(image::ImageError),
-    EncodePng(image::ImageError),
     MathUndetected,
 }
 
@@ -168,19 +167,8 @@ async fn handle(state: Arc<State>, query: Query) -> Result<MathState, Arc<Error>
             .map_err(|e| Error::Internal(InternalError::DecodePng(e)))?;
         let area =
             detect_rendered_area(&image).ok_or(Error::Internal(InternalError::MathUndetected))?;
-        let image = image.crop_imm(area.x, area.y, area.w, area.h);
-        let mut png_buf = Vec::new();
-        image
-            .write_to(&mut png_buf, image::ImageOutputFormat::Png)
-            .map_err(|e| Error::Internal(InternalError::EncodePng(e)))?;
-        let mut jpeg_buf = Vec::new();
-        image
-            .write_to(&mut jpeg_buf, image::ImageOutputFormat::Jpeg(200))
-            .map_err(|e| Error::Internal(InternalError::EncodePng(e)))?;
-        Ok(MathState::Ready {
-            png: png_buf,
-            jpeg: jpeg_buf,
-        })
+        let img = image.crop_imm(area.x, area.y, area.w, area.h);
+        Ok(MathState::Ready { img })
     };
     state
         .math
@@ -241,12 +229,32 @@ pub async fn endpoint(
     };
     match handle(state, query.clone()).await {
         Ok(result) => match (result, query) {
-            (MathState::Ready { png, jpeg: _ }, Query::Png(_)) => {
+            (MathState::Ready { img }, Query::Png(_)) => {
+                let mut png = Vec::new();
+                if let Err(e) = img.write_to(&mut png, ImageOutputFormat::Png) {
+                    let mut headers = HeaderMap::new();
+                    headers.append("Content-Type", HeaderValue::from_static("text/plain"));
+                    return (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        headers,
+                        format!("failed to encode png: {}", e).as_bytes().to_vec(),
+                    );
+                }
                 let mut headers = HeaderMap::new();
                 headers.append("Content-Type", HeaderValue::from_static("image/png"));
                 (StatusCode::ACCEPTED, headers, png)
             }
-            (MathState::Ready { png: _, jpeg }, Query::Jpeg(_)) => {
+            (MathState::Ready { img }, Query::Jpeg(_)) => {
+                let mut jpeg = Vec::new();
+                if let Err(e) = img.write_to(&mut jpeg, ImageOutputFormat::Jpeg(200)) {
+                    let mut headers = HeaderMap::new();
+                    headers.append("Content-Type", HeaderValue::from_static("text/plain"));
+                    return (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        headers,
+                        format!("failed to encode jpeg: {}", e).as_bytes().to_vec(),
+                    );
+                }
                 let mut headers = HeaderMap::new();
                 headers.append("Content-Type", HeaderValue::from_static("image/jpeg"));
                 (StatusCode::ACCEPTED, headers, jpeg)
