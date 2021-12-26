@@ -1,7 +1,7 @@
 (
-    satysfi: "/usr/local/bin/satysfi",
-    pdftoppm: "/usr/bin/pdftoppm",
-    satyh: "/usr/share/satymathbot/empty.satyh",
+    satysfi: "/Users/namachan/.opam/4.11.0/bin/satysfi",
+    pdftoppm: "/opt/homebrew/bin/pdftoppm",
+    satyh: "./satysfi/empty.satyh",
     workdir: "/tmp/satymathbot",
     capacity: 4096,
     sock: Tcp(3000),
