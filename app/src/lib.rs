@@ -3,11 +3,11 @@ use axum::extract::{Extension, Path};
 use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
 use image::{DynamicImage, GenericImageView, Pixel};
+use moka::future::Cache;
 use std::process::ExitStatus;
 use std::string;
 use std::sync::Arc;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::sync::Mutex;
 use tokio::{fs, io, process};
 use tracing::warn;
 
@@ -31,14 +31,14 @@ pub struct Config {
 }
 
 pub struct State {
-    math: Mutex<lru::LruCache<String, MathState>>,
+    math: Cache<String, MathState>,
     cfg: Config,
 }
 
 impl State {
     pub fn new(cfg: Config) -> Self {
         Self {
-            math: Mutex::new(lru::LruCache::new(cfg.capacity)),
+            math: Cache::new(cfg.capacity),
             cfg,
         }
     }
@@ -107,19 +107,12 @@ fn detect_rendered_area(image: &DynamicImage) -> Option<Area> {
     }
 }
 
-async fn handle(state: Arc<State>, query: Query) -> Result<MathState, Error> {
+async fn handle(state: Arc<State>, query: Query) -> Result<MathState, Arc<Error>> {
     let base64_math = query.base64();
     let math = base64::decode_config(&base64_math, base64::URL_SAFE)
         .map_err(|e| Error::BadRequest(BadRequest::Base64(e)))?;
     let math = String::from_utf8(math).map_err(|e| Error::BadRequest(BadRequest::NoUnicode(e)))?;
-    if let Some(result) = {
-        let mut lock = state.math.lock().await;
-        let inner = lock.get(base64_math).cloned();
-        drop(lock);
-        inner
-    } {
-        Ok(result)
-    } else {
+    let proc = async {
         let saty_path = format!("{}/{}.saty", state.cfg.workdir, base64_math);
         let pdf_path = format!("{}/{}.pdf", state.cfg.workdir, base64_math);
         let pdtfoppm_target = format!("{}/{}", state.cfg.workdir, base64_math);
@@ -143,14 +136,9 @@ async fn handle(state: Arc<State>, query: Query) -> Result<MathState, Error> {
             .map_err(|e| Error::Internal(InternalError::SpawnSatysfi(e)))?;
 
         if !satysfi_result.status.success() {
-            let result =
-                MathState::Error(String::from_utf8_lossy(&satysfi_result.stdout).to_string());
-            state
-                .math
-                .lock()
-                .await
-                .put(base64_math.to_owned(), result.clone());
-            return Ok(result);
+            return Ok(MathState::Error(
+                String::from_utf8_lossy(&satysfi_result.stdout).to_string(),
+            ));
         }
         let pdftoppm_result = process::Command::new(&state.cfg.pdftoppm)
             .arg("-png")
@@ -189,17 +177,15 @@ async fn handle(state: Arc<State>, query: Query) -> Result<MathState, Error> {
         image
             .write_to(&mut jpeg_buf, image::ImageOutputFormat::Jpeg(200))
             .map_err(|e| Error::Internal(InternalError::EncodePng(e)))?;
-        let result = MathState::Ready {
+        Ok(MathState::Ready {
             png: png_buf,
             jpeg: jpeg_buf,
-        };
-        state
-            .math
-            .lock()
-            .await
-            .put(base64_math.to_owned(), result.clone());
-        Ok(result)
-    }
+        })
+    };
+    state
+        .math
+        .get_or_try_insert_with(base64_math.to_owned(), proc)
+        .await
 }
 
 pub enum PrepareError {
@@ -253,40 +239,44 @@ pub async fn endpoint(
             );
         }
     };
-    match (handle(state, query.clone()).await, query) {
-        (Ok(MathState::Ready { png, jpeg: _ }), Query::Png(_)) => {
-            let mut headers = HeaderMap::new();
-            headers.append("Content-Type", HeaderValue::from_static("image/png"));
-            (StatusCode::ACCEPTED, headers, png)
-        }
-        (Ok(MathState::Ready { png: _, jpeg }), Query::Jpeg(_)) => {
-            let mut headers = HeaderMap::new();
-            headers.append("Content-Type", HeaderValue::from_static("image/jpeg"));
-            (StatusCode::ACCEPTED, headers, jpeg)
-        }
-        (Ok(MathState::Error(errmsg)), _) => {
-            let mut headers = HeaderMap::new();
-            headers.append("Content-Type", HeaderValue::from_static("text/plain"));
-            (StatusCode::BAD_REQUEST, headers, errmsg.as_bytes().to_vec())
-        }
-        (Err(Error::BadRequest(e)), _) => {
-            let mut headers = HeaderMap::new();
-            headers.append("Content-Type", HeaderValue::from_static("text/plain"));
-            (
-                StatusCode::BAD_REQUEST,
-                headers,
-                format!("Error: {:?}", e).as_bytes().to_vec(),
-            )
-        }
-        (Err(Error::Internal(e)), _) => {
-            warn!("{:?}", e);
-            let mut headers = HeaderMap::new();
-            headers.append("Content-Type", HeaderValue::from_static("text/plain"));
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                headers,
-                format!("Error: {:?}", e).as_bytes().to_vec(),
-            )
-        }
+    match handle(state, query.clone()).await {
+        Ok(result) => match (result, query) {
+            (MathState::Ready { png, jpeg: _ }, Query::Png(_)) => {
+                let mut headers = HeaderMap::new();
+                headers.append("Content-Type", HeaderValue::from_static("image/png"));
+                (StatusCode::ACCEPTED, headers, png)
+            }
+            (MathState::Ready { png: _, jpeg }, Query::Jpeg(_)) => {
+                let mut headers = HeaderMap::new();
+                headers.append("Content-Type", HeaderValue::from_static("image/jpeg"));
+                (StatusCode::ACCEPTED, headers, jpeg)
+            }
+            (MathState::Error(errmsg), _) => {
+                let mut headers = HeaderMap::new();
+                headers.append("Content-Type", HeaderValue::from_static("text/plain"));
+                (StatusCode::BAD_REQUEST, headers, errmsg.as_bytes().to_vec())
+            }
+        },
+        Err(e) => match e.as_ref() {
+            Error::BadRequest(e) => {
+                let mut headers = HeaderMap::new();
+                headers.append("Content-Type", HeaderValue::from_static("text/plain"));
+                (
+                    StatusCode::BAD_REQUEST,
+                    headers,
+                    format!("Error: {:?}", e).as_bytes().to_vec(),
+                )
+            }
+            Error::Internal(e) => {
+                warn!("{:?}", e);
+                let mut headers = HeaderMap::new();
+                headers.append("Content-Type", HeaderValue::from_static("text/plain"));
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    headers,
+                    format!("Error: {:?}", e).as_bytes().to_vec(),
+                )
+            }
+        },
     }
 }

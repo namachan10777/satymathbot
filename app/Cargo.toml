@@ -20,7 +20,7 @@ futures = "0.3.19"
 hyper = {version = "0.14.16", default-features = false}
 hyperlocal = "0.8.0"
 image = {version = "0.23.14", default-features = false, features = ["png", "jpeg"]}
-lru = "0.7.1"
+moka = {version="0.6.2", features=["future"]}
 ron = "0.7.0"
 serde = {version = "1.0.132", features = ["derive"]}
 tokio = {version = "1.15.0", features = ["macros", "fs", "process", "io-util", "rt-multi-thread", "signal"]}
