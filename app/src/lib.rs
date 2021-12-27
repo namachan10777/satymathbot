@@ -2,7 +2,7 @@ use askama::Template;
 use axum::extract::{Extension, Path};
 use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
-use image::{DynamicImage, GenericImage, GenericImageView, ImageOutputFormat, Pixel, Rgba};
+use image::{DynamicImage, GenericImageView, ImageOutputFormat, Pixel, Rgba, RgbaImage};
 use moka::future::Cache;
 use std::process::ExitStatus;
 use std::string;
@@ -13,7 +13,7 @@ use tokio::{fs, io, process};
 #[derive(Debug, PartialEq, Clone)]
 enum MathState {
     Error(String),
-    Ready { img: DynamicImage },
+    Ready { img: RgbaImage },
 }
 
 #[derive(askama::Template)]
@@ -153,27 +153,31 @@ impl TextColor {
     }
 }
 
-fn convert(img: &mut DynamicImage, to: TextColor) {
+fn convert(img: &mut RgbaImage, to: TextColor) {
     let (w, h) = img.dimensions();
     for x in 0..w {
         for y in 0..h {
             let to_inv = to.invert();
-            let Rgba([r, g, b, a]) = img.get_pixel_mut(x, y);
-            *r = 255 - (to_inv.r as f64 * (*a as f64 / 255.0)) as u8;
-            *g = 255 - (to_inv.g as f64 * (*a as f64 / 255.0)) as u8;
-            *b = 255 - (to_inv.b as f64 * (*a as f64 / 255.0)) as u8;
+            let Rgba([_, _, _, a]) = img.get_pixel(x, y);
+            let r = 255 - (to_inv.r as f64 * (*a as f64 / 255.0)) as u8;
+            let g = 255 - (to_inv.g as f64 * (*a as f64 / 255.0)) as u8;
+            let b = 255 - (to_inv.b as f64 * (*a as f64 / 255.0)) as u8;
+            let pixel = Rgba([r, g, b, *a]);
+            img.put_pixel(x, y, pixel);
         }
     }
 }
 
-fn alpha(img: &mut DynamicImage) {
+fn alpha(img: &mut RgbaImage) {
     let (w, h) = img.dimensions();
     for x in 0..w {
         for y in 0..h {
-            let Rgba([r, g, b, a]) = img.get_pixel_mut(x, y);
-            let darkness =
-                ((*r * *r + *g * *g + *b * *b) as f64).sqrt() / (255.0 * 255.0 * 3.0_f64).sqrt();
-            *a = (255.0 * darkness) as u8;
+            let Rgba([r, g, b, _]) = img.get_pixel(x, y);
+            let (r, g, b) = (*r as f64, *g as f64, *b as f64);
+            let darkness = 1.0 - (r * r + g * g + b * b).sqrt() / (255.0 * 255.0 * 3.0_f64).sqrt();
+            let a = (255.0 * darkness) as u8;
+            let pixel = Rgba([r as u8, g as u8, b as u8, a]);
+            img.put_pixel(x, y, pixel);
         }
     }
 }
@@ -239,7 +243,8 @@ async fn handle(state: Arc<State>, query: Query) -> Result<MathState, Arc<Error>
             .map_err(|e| Error::Internal(InternalError::DecodePng(e)))?;
         let area =
             detect_rendered_area(&image).ok_or(Error::Internal(InternalError::MathUndetected))?;
-        let mut img = image.crop_imm(area.x, area.y, area.w, area.h);
+        let img = image.crop_imm(area.x, area.y, area.w, area.h);
+        let mut img = img.to_rgba8();
         alpha(&mut img);
         Ok(MathState::Ready { img })
     };
@@ -296,14 +301,14 @@ fn text_response(src: &str, status: StatusCode) -> (StatusCode, HeaderMap, Vec<u
 }
 
 fn image_response(
-    mut img: DynamicImage,
+    mut img: RgbaImage,
     color: TextColor,
     mime: &'static str,
     format: ImageOutputFormat,
 ) -> (StatusCode, HeaderMap, Vec<u8>) {
     let mut png = Vec::new();
     convert(&mut img, color);
-    if let Err(e) = img.write_to(&mut png, format) {
+    if let Err(e) = DynamicImage::ImageRgba8(img).write_to(&mut png, format) {
         return text_response(
             &format!("failed to encode png: {:?}", e),
             StatusCode::INTERNAL_SERVER_ERROR,
