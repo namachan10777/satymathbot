@@ -130,7 +130,8 @@ fn hex_primary(input: &str) -> IResult<&str, u8> {
 }
 
 fn hex_short(input: &str) -> IResult<&str, u8> {
-    map_res(take_while_m_n(1, 1, is_hex_digit), from_hex)(input)
+    let (input, x) = map_res(take_while_m_n(1, 1, is_hex_digit), from_hex)(input)?;
+    Ok((input, x << 4))
 }
 
 impl TextColor {
