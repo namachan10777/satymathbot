@@ -33,34 +33,51 @@
 	})();
 
 	// handlers
-	function handleShow() {
-		async function request(): Promise<ImgState> {
-			let url = mathURL;
-			const res = await fetch(mathURL);
-			if (res.ok && res.url === url) {
-				const blob = await res.blob();
-				return {
-					state: 'success',
-					url: URL.createObjectURL(blob)
-				};
-			} else {
-				const txt = await res.text();
-				return {
-					state: 'error',
-					txt
-				};
-			}
+	let fetchAbortController: null | AbortController = null;
+	let fetchGraceID: null | number = null;
+
+	async function request(): Promise<ImgState> {
+		let url = mathURL;
+		if (fetchAbortController) {
+			fetchAbortController.abort();
 		}
-		imgSrc = request();
+		fetchAbortController = new AbortController();
+		const res = await fetch(mathURL, {
+			signal: fetchAbortController.signal
+		});
+		if (res.ok && res.url === url) {
+			const blob = await res.blob();
+			return {
+				state: 'success',
+				url: URL.createObjectURL(blob)
+			};
+		} else {
+			const txt = await res.text();
+			return {
+				state: 'error',
+				txt
+			};
+		}
+	}
+
+	function fetchImageSpeculative() {
+		if (fetchGraceID) {
+			clearTimeout(fetchGraceID);
+		}
+		fetchGraceID = window.setTimeout(() => {
+			imgSrc = request();
+		}, 300);
 	}
 	function handleCopy() {
 		navigator.clipboard.writeText(mathURL);
 	}
 	function handleMathUpdate(e: SveltEvent<HTMLInputElement>) {
 		mathURL = createMathURL(e.currentTarget.value, format);
+		fetchImageSpeculative();
 	}
 	function handleFormatUpdate(e: SveltEvent<HTMLInputElement>) {
 		mathURL = createMathURL(math, e.currentTarget.value);
+		fetchImageSpeculative();
 	}
 </script>
 
@@ -74,7 +91,6 @@
 		A formula rendering server driven by <a href="https://github.com/gfngfn/SATySFi">SATySFi</a>.
 	</p>
 	<input type="text" on:input={handleMathUpdate} bind:value={math} />
-	<button on:click={handleShow}>show</button>
 	<form>
 		<label
 			>PNG<input
