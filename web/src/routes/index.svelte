@@ -3,6 +3,7 @@
 </script>
 
 <script lang="ts">
+	// type definitions
 	type ImgState =
 		| {
 				state: 'success';
@@ -12,25 +13,31 @@
 				state: 'error';
 				txt: string;
 		  };
+	type SveltEvent<T> = Event & { currentTarget: T };
 
+	// helper functions
 	function base64Encode(src: string) {
 		const binStr = unescape(encodeURIComponent(src));
 		return btoa(binStr);
 	}
-	function makeMathUrl(src: string) {
-		return `https://satymathbot.net/m/${base64Encode(src)}.png`;
+	function createMathURL(math: string, format: string): string {
+		return `https://satymathbot.net/m/${base64Encode(math)}.${format}`;
 	}
+
+	// state
 	let math = 'e^{i\\pi} + 1 = 0';
-	let mathURL = makeMathUrl(math);
+	let format = 'png';
+	let mathURL = createMathURL(math, format);
 	let imgSrc: Promise<ImgState> = (async () => {
 		return { state: 'success', url: mathURL };
 	})();
+
+	// handlers
 	function handleShow() {
-		const url = makeMathUrl(math);
-		mathURL = url;
 		async function request(): Promise<ImgState> {
-			const res = await fetch(url);
-			if (res.ok) {
+			let url = mathURL;
+			const res = await fetch(mathURL);
+			if (res.ok && res.url === url) {
 				const blob = await res.blob();
 				return {
 					state: 'success',
@@ -49,6 +56,12 @@
 	function handleCopy() {
 		navigator.clipboard.writeText(mathURL);
 	}
+	function handleMathUpdate(e: SveltEvent<HTMLInputElement>) {
+		mathURL = createMathURL(e.currentTarget.value, format);
+	}
+	function handleFormatUpdate(e: SveltEvent<HTMLInputElement>) {
+		mathURL = createMathURL(math, e.currentTarget.value);
+	}
 </script>
 
 <svelte:head>
@@ -60,8 +73,29 @@
 	<p>
 		A formula rendering server driven by <a href="https://github.com/gfngfn/SATySFi">SATySFi</a>.
 	</p>
-	<input type="text" bind:value={math} />
+	<input type="text" on:input={handleMathUpdate} bind:value={math} />
 	<button on:click={handleShow}>show</button>
+	<form>
+		<label
+			>PNG<input
+				bind:group={format}
+				on:change={handleFormatUpdate}
+				name="format"
+				value="png"
+				type="radio"
+				checked
+			/></label
+		>
+		<label
+			>JPEG<input
+				bind:group={format}
+				on:change={handleFormatUpdate}
+				name="format"
+				value="jpeg"
+				type="radio"
+			/></label
+		>
+	</form>
 	<pre>{mathURL}</pre>
 	<button on:click={handleCopy}>copy</button>
 	{#await imgSrc}
