@@ -105,7 +105,7 @@ fn detect_rendered_area(image: &DynamicImage) -> Option<Area> {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default)]
 struct TextColor {
     r: u8,
     g: u8,
@@ -335,8 +335,11 @@ pub async fn endpoint(
             )
         }
     };
-    let color = params.color.unwrap_or_else(|| "FFF".to_owned());
-    let color = if let Some(color) = TextColor::parse_from_str(&color) {
+    let color = params
+        .color
+        .map(|color| TextColor::parse_from_str(&color))
+        .unwrap_or_else(|| Some(TextColor::default()));
+    let color = if let Some(color) = color {
         color
     } else {
         return text_response("invalid color specification", StatusCode::BAD_REQUEST);
