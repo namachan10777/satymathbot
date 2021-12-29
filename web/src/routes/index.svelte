@@ -20,14 +20,15 @@
 		const binStr = unescape(encodeURIComponent(src));
 		return btoa(binStr);
 	}
-	function createMathURL(math: string, format: string): string {
-		return `https://satymathbot.net/m/${base64Encode(math)}.${format}`;
+	function createMathURL(math: string, format: string, color: string): string {
+		return `https://satymathbot.net/m/${base64Encode(math)}.${format}?color=${color}`;
 	}
 
 	// state
 	let math = 'e^{i\\pi} + 1 = 0';
 	let format = 'png';
-	let mathURL = createMathURL(math, format);
+	let color = '000';
+	let mathURL = createMathURL(math, format, color);
 	let imgSrc: Promise<ImgState> = (async () => {
 		return { state: 'success', url: mathURL };
 	})();
@@ -72,11 +73,15 @@
 		navigator.clipboard.writeText(mathURL);
 	}
 	function handleMathUpdate(e: SveltEvent<HTMLInputElement>) {
-		mathURL = createMathURL(e.currentTarget.value, format);
+		mathURL = createMathURL(e.currentTarget.value, format, color);
 		fetchImageSpeculative();
 	}
 	function handleFormatUpdate(e: SveltEvent<HTMLInputElement>) {
-		mathURL = createMathURL(math, e.currentTarget.value);
+		mathURL = createMathURL(math, e.currentTarget.value, color);
+		fetchImageSpeculative();
+	}
+	function handleColorUpdate(e: SveltEvent<HTMLInputElement>) {
+		mathURL = createMathURL(math, format, e.currentTarget.value.slice(1));
 		fetchImageSpeculative();
 	}
 </script>
@@ -91,6 +96,10 @@
 		A formula rendering server driven by <a href="https://github.com/gfngfn/SATySFi">SATySFi</a>.
 	</p>
 	<input type="text" on:input={handleMathUpdate} bind:value={math} />
+	<label>
+		Text color
+		<input type="color" on:change={handleColorUpdate} />
+	</label>
 	<form>
 		<label
 			>PNG<input
