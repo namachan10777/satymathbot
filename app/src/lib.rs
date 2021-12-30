@@ -55,6 +55,7 @@ enum InternalError {
     ReadPng(io::Error),
     DecodePng(image::ImageError),
     MathUndetected,
+    DeleteFile(String, io::Error),
 }
 
 #[derive(Debug)]
@@ -244,6 +245,15 @@ async fn handle(state: Arc<State>, query: Query) -> Result<MathState, Arc<Error>
             .map_err(|e| Error::Internal(InternalError::DecodePng(e)))?;
         let area =
             detect_rendered_area(&image).ok_or(Error::Internal(InternalError::MathUndetected))?;
+        fs::remove_file(&saty_path)
+            .await
+            .map_err(|e| Error::Internal(InternalError::DeleteFile(saty_path, e)))?;
+        fs::remove_file(&pdf_path)
+            .await
+            .map_err(|e| Error::Internal(InternalError::DeleteFile(pdf_path, e)))?;
+        fs::remove_file(&png_path)
+            .await
+            .map_err(|e| Error::Internal(InternalError::DeleteFile(png_path, e)))?;
         let img = image.crop_imm(area.x, area.y, area.w, area.h);
         let mut img = img.to_rgba8();
         alpha(&mut img);
