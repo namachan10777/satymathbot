@@ -9,6 +9,7 @@ use std::string;
 use std::sync::Arc;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::{fs, io, process};
+use tracing::{info, warn};
 
 #[derive(Debug, PartialEq, Clone)]
 enum MathState {
@@ -366,12 +367,16 @@ pub async fn endpoint(
         },
         Err(e) => match e.as_ref() {
             Error::BadRequest(e) => {
+                info!("bad request: {:?}", e);
                 text_response(&format!("Error: {:?}", e), StatusCode::BAD_REQUEST)
             }
-            Error::Internal(e) => text_response(
-                &format!("Error: {:?}", e),
-                StatusCode::INTERNAL_SERVER_ERROR,
-            ),
+            Error::Internal(e) => {
+                warn!("internal error: {:?}", e);
+                text_response(
+                    &format!("Error: {:?}", e),
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                )
+            }
         },
     }
 }
