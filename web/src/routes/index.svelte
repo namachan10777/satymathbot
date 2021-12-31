@@ -90,51 +90,70 @@
 	<title>SATyMathBot</title>
 </svelte:head>
 
-<section>
-	<h1>SATyMathBot</h1>
-	<p>
-		A formula rendering server driven by <a href="https://github.com/gfngfn/SATySFi">SATySFi</a>.
-	</p>
-	<input type="text" on:input={handleMathUpdate} bind:value={math} />
-	<label>
-		Text color
-		<input type="color" on:change={handleColorUpdate} />
-	</label>
-	<form>
-		<label
-			>PNG<input
-				bind:group={format}
-				on:change={handleFormatUpdate}
-				name="format"
-				value="png"
-				type="radio"
-				checked
-			/></label
+<section class="bg-gray-200 h-full flex flex-col justify-center">
+	<div class="shadow-md rounded py-2 px-2 bg-white m-1 border flex flex-col items-center ">
+		<h1 class="text-xl">SATyMathBot</h1>
+		<p>
+			A formula rendering server driven by <a
+				class="underline text-indigo-700 hover:text-indigo-500"
+				href="https://github.com/gfngfn/SATySFi">SATySFi</a
+			>.
+		</p>
+		<div class="w-full border-b border-gray-500 my-2"></div>
+		<input
+			type="text"
+			class="w-full border-indigo-700 leading-tight shadow appearance-none border rounded px-2 py-1 focus:outline-none focus:shadow-outline"
+			on:input={handleMathUpdate}
+			bind:value={math}
+		/>
+		<label>
+			Text color
+			<input type="color" on:change={handleColorUpdate} />
+		</label>
+		<form class="flex flex-col">
+			<label
+				><input
+					bind:group={format}
+					on:change={handleFormatUpdate}
+					name="format"
+					value="png"
+					type="radio"
+					checked
+				/> PNG</label
+			>
+			<label
+				><input
+					bind:group={format}
+					on:change={handleFormatUpdate}
+					name="format"
+					value="jpeg"
+					type="radio"
+				/> JPEG</label
+			>
+		</form>
+		<pre class="p-1 leading-tight w-full border border-indigo-200 rounded overflow-scroll font-mono">{mathURL}</pre>
+		<button
+			class="rounded my-1 border-2 border-indigo-700 text-indigo-700 px-1 hover:text-white hover:bg-indigo-700"
+			on:click={handleCopy}>copy</button
 		>
-		<label
-			>JPEG<input
-				bind:group={format}
-				on:change={handleFormatUpdate}
-				name="format"
-				value="jpeg"
-				type="radio"
-			/></label
-		>
-	</form>
-	<pre>{mathURL}</pre>
-	<button on:click={handleCopy}>copy</button>
-	{#await imgSrc}
-		<div class="loader">loading...</div>
-	{:then src}
-		{#if src.state === 'success'}
-			<img src={src.url} alt={mathURL} />
-		{:else}
-			<p>{src.txt}</p>
-		{/if}
-	{/await}
+		<div class="img-box flex flex-col items-center justify-center">
+			{#await imgSrc}
+				<div class="loader">loading...</div>
+			{:then src}
+				{#if src.state === 'success'}
+					<img class="my-2 border border-indigo-400" src={src.url} alt={mathURL} />
+				{:else}
+					<pre class="bg-gray-100 p-1 rounded font-mono text-sm">{src.txt}</pre>
+				{/if}
+			{/await}
+		</div>
+	</div>
 </section>
 
 <style>
+	.img-box {
+		min-height: 30vh;
+	}
 	section {
 		display: flex;
 		flex-direction: column;
