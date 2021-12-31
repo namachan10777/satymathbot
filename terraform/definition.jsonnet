@@ -1,4 +1,4 @@
-local revision = 'd8deaf6c6937d0cdc25b2b626886972f67a4b57b';
+local revision = '3a09ff29c03ab0b715ea9aac00ee80c49e3a3f0d';
 local account_id = 966924987919;
 local image(component) = account_id + '.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-' + component + ':' + revision;
 local logConfiguration = {
