@@ -90,8 +90,10 @@
 	<title>SATyMathBot</title>
 </svelte:head>
 
-<section class="bg-gray-200 h-full flex flex-col justify-center">
-	<div class="shadow-md rounded py-2 px-2 bg-white m-1 border flex flex-col items-center ">
+<section class="bg-gray-200 min-h-full flex flex-col justify-center">
+	<div
+		class="shadow-md rounded py-2 card-width-default mx-2 px-2 bg-white m-1 border flex flex-col items-center "
+	>
 		<h1 class="text-xl">SATyMathBot</h1>
 		<p>
 			A formula rendering server driven by <a
@@ -99,7 +101,7 @@
 				href="https://github.com/gfngfn/SATySFi">SATySFi</a
 			>.
 		</p>
-		<div class="w-full border-b border-gray-500 my-2"></div>
+		<div class="w-full border-b border-gray-500 my-2" />
 		<input
 			type="text"
 			class="w-full border-indigo-700 leading-tight shadow appearance-none border rounded px-2 py-1 focus:outline-none focus:shadow-outline"
@@ -131,19 +133,21 @@
 				/> JPEG</label
 			>
 		</form>
-		<pre class="p-1 leading-tight w-full border border-indigo-200 rounded overflow-scroll font-mono">{mathURL}</pre>
+		<pre
+			class="p-1 leading-tight w-full border border-indigo-200 rounded overflow-scroll font-mono">{mathURL}</pre>
 		<button
 			class="rounded my-1 border-2 border-indigo-700 text-indigo-700 px-1 hover:text-white hover:bg-indigo-700"
 			on:click={handleCopy}>copy</button
 		>
-		<div class="img-box flex flex-col items-center justify-center">
+		<div class="img-box flex flex-col items-center justify-center w-full">
 			{#await imgSrc}
 				<div class="loader">loading...</div>
 			{:then src}
 				{#if src.state === 'success'}
 					<img class="my-2 border border-indigo-400" src={src.url} alt={mathURL} />
 				{:else}
-					<pre class="bg-gray-100 p-1 rounded font-mono text-sm">{src.txt}</pre>
+					<pre
+						class="overflow-scroll bg-gray-100 p-1 rounded w-full font-mono text-sm">{src.txt}</pre>
 				{/if}
 			{/await}
 		</div>
@@ -151,6 +155,14 @@
 </section>
 
 <style>
+	.card-width-default {
+		width: calc(100% - 2rem);
+	}
+	@media (min-width: 768px) {
+		.card-width-default {
+			width: 60%;
+		}
+	}
 	.img-box {
 		min-height: 30vh;
 	}
