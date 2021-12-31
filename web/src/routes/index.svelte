@@ -29,6 +29,7 @@
 	let format = 'png';
 	let color = '000';
 	let mathURL = createMathURL(math, format, color);
+	let copied_msg_style = 'opacity: 0;';
 	let imgSrc: Promise<ImgState> = (async () => {
 		return { state: 'success', url: mathURL };
 	})();
@@ -71,6 +72,10 @@
 	}
 	function handleCopy() {
 		navigator.clipboard.writeText(mathURL);
+		copied_msg_style = 'opacity: 1;';
+		setTimeout(() => {
+			copied_msg_style = 'opacity: 0;';
+		}, 2000);
 	}
 	function handleMathUpdate(e: SveltEvent<HTMLInputElement>) {
 		mathURL = createMathURL(e.currentTarget.value, format, color);
@@ -135,10 +140,13 @@
 		</form>
 		<pre
 			class="p-1 leading-tight w-full border border-indigo-200 rounded overflow-scroll font-mono">{mathURL}</pre>
-		<button
-			class="rounded my-1 border-2 border-indigo-700 text-indigo-700 px-1 hover:text-white hover:bg-indigo-700"
-			on:click={handleCopy}>copy</button
-		>
+		<div class="with-copied-msg">
+			<button
+				class="copy-button rounded my-1 border-2 border-indigo-700 text-indigo-700 px-1 hover:text-white hover:bg-indigo-700"
+				on:click={handleCopy}>copy</button
+			>
+			<span class="copied-msg" style={copied_msg_style}>copied!</span>
+		</div>
 		<div class="img-box flex flex-col items-center justify-center w-full">
 			{#await imgSrc}
 				<div class="loader">loading...</div>
@@ -155,6 +163,33 @@
 </section>
 
 <style>
+	.copy-button {
+		width: 3rem;
+	}
+	.with-copied-msg {
+		position: relative;
+		cursor: pointer;
+		display: inline-block;
+	}
+	.copied-msg {
+		box-shadow: 2px 2px 4px black;
+		position: absolute;
+		padding: 0.1rem;
+		border-radius: 0.2rem;
+		background-color: #333;
+		color: #fff;
+		top: 0.35rem;
+		left: 3.3rem;
+		transition: opacity 0.2s ease-in-out;
+	}
+	.copied-msg:before {
+		content: '';
+		position: absolute;
+		left: -0.6rem;
+		top: 0.5rem;
+		border: 0.3rem solid transparent;
+		border-right: 0.3rem solid #333;
+	}
 	.card-width-default {
 		width: calc(100% - 2rem);
 	}
