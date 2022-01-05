@@ -7,7 +7,9 @@ USER root
 RUN apt-get update && apt-get install -y pkg-config
 
 USER opam
-RUN opam install -y satysfi satysfi-dist satyrographos
+RUN opam install -y \
+    satysfi satysfi-dist satyrographos \
+    satysfi-siunitx satysfi-uline satysfi-matrix
 RUN opam exec -- satyrographos install
 
 USER root
@@ -29,9 +31,9 @@ FROM public.ecr.aws/ubuntu/ubuntu:21.04
 RUN apt-get update && apt-get install -y poppler-utils libjpeg-dev
 COPY ./satysfi/empty.satyh /etc/satymathbot/empty.satyh
 COPY ./prod.ron /etc/satymathbot/config.ron
-COPY --from=satysfi-builder /usr/local/bin/satysfi /usr/local/bin/satysfi
 COPY --from=satymathbot-builder /work/target/release/satymathbot /usr/local/bin/satymathbot
-COPY --from=satysfi-builder /home/opam/.opam/4.10/share/satysfi /.satysfi
+COPY --from=satysfi-builder /home/opam/.satysfi/ /.satysfi
+COPY --from=satysfi-builder /home/opam/.opam/4.10/share/satysfi /home/opam/.opam/4.10/share/satysfi
 COPY ./entry.sh /usr/local/bin/entry.sh
 
 RUN groupadd -g 101 satymathbot && useradd -rm -s /bin/bash -u 101 -g satymathbot satymathbot
