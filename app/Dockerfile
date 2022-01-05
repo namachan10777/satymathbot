@@ -12,9 +12,6 @@ RUN opam install -y \
     satysfi-siunitx satysfi-uline satysfi-matrix
 RUN opam exec -- satyrographos install
 
-USER root
-RUN cp /home/opam/.opam/4.10/bin/satysfi /usr/local/bin/satysfi
-
 FROM public.ecr.aws/docker/library/rust:latest as satymathbot-builder
 WORKDIR /work
 COPY Cargo.lock /work/Cargo.lock
@@ -28,15 +25,17 @@ RUN sed -ie 's#dummy.rs#src/main.rs#g' Cargo.toml
 RUN cargo build --release
 
 FROM public.ecr.aws/ubuntu/ubuntu:21.04
-RUN apt-get update && apt-get install -y poppler-utils libjpeg-dev
+RUN apt-get update && apt-get install -y poppler-utils libjpeg-dev sudo
 COPY ./satysfi/empty.satyh /etc/satymathbot/empty.satyh
 COPY ./prod.ron /etc/satymathbot/config.ron
 COPY --from=satymathbot-builder /work/target/release/satymathbot /usr/local/bin/satymathbot
-COPY --from=satysfi-builder /home/opam/.satysfi/ /.satysfi
 COPY --from=satysfi-builder /home/opam/.opam/4.10/share/satysfi /home/opam/.opam/4.10/share/satysfi
+COPY --from=satysfi-builder /home/opam/.opam/4.10/bin/satysfi /usr/local/bin/satysfi
 COPY ./entry.sh /usr/local/bin/entry.sh
 
 RUN groupadd -g 101 satymathbot && useradd -rm -s /bin/bash -u 101 -g satymathbot satymathbot
+
+COPY --from=satysfi-builder /home/opam/.satysfi/ /home/satymathbot/.satysfi
 
 RUN chown root:root /usr/local/bin/entry.sh && chmod 4755 /usr/local/bin/entry.sh
 RUN chown satymathbot:satymathbot /usr/local/bin/satymathbot && chmod 4755 /usr/local/bin/satymathbot
