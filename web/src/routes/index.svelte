@@ -18,7 +18,8 @@
 	// helper functions
 	function base64Encode(src: string) {
 		const binStr = unescape(encodeURIComponent(src));
-		return btoa(binStr);
+		const rawBase64 = btoa(binStr);
+		return rawBase64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 	}
 	function createMathURL(math: string, format: string, color: string): string {
 		return `https://satymathbot.net/m/${base64Encode(math)}.${format}?color=${color}`;
