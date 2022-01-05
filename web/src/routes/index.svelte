@@ -15,6 +15,41 @@
 		  };
 	type SveltEvent<T> = Event & { currentTarget: T };
 
+	const supportedPackages = [
+		{
+			name: 'math',
+			link: 'https://github.com/gfngfn/SATySFi/blob/master/lib-satysfi/dist/packages/math.satyh',
+			desc: 'Standard math package'
+		},
+		{
+			name: 'color',
+			link: 'https://github.com/gfngfn/SATySFi/blob/master/lib-satysfi/dist/packages/color.satyh',
+			desc: 'Standard color package'
+		},
+		{
+			name: 'gr',
+			link: 'https://github.com/gfngfn/SATySFi/blob/master/lib-satysfi/dist/packages/gr.satyh',
+			desc: 'Standard graphics package'
+		},
+		{
+			name: 'bnf',
+			link: 'https://github.com/gfngfn/SATySFi/blob/master/lib-satysfi/dist/packages/bnf.satyh',
+			desc: 'Standard BNF package'
+		},
+		{
+			name: 'proof',
+			link: 'https://github.com/gfngfn/SATySFi/blob/master/lib-satysfi/dist/packages/proof.satyh',
+			desc: 'Standard proof package'
+		},
+		{
+			name: 'siunitx',
+			link: 'https://github.com/puripuri2100/SATySFi-siunitx',
+			desc: 'like siunitx in LaTeX'
+		},
+		{ name: 'uline', link: 'https://github.com/puripuri2100/SATySFi-uline', desc: 'underline' },
+		{ name: 'matrix', link: 'https://github.com/nekketsuuu/satysfi-matrix', desc: 'matrix' }
+	];
+
 	// helper functions
 	function base64Encode(src: string) {
 		const binStr = unescape(encodeURIComponent(src));
@@ -107,6 +142,25 @@
 				href="https://github.com/gfngfn/SATySFi">SATySFi</a
 			>.
 		</p>
+		<table class="table-auto">
+			<caption class="font-medium">supported packages</caption>
+			<thead
+				><tr class="border-b border-black"
+					><th class="border-r border-black pr-2 font-medium">name</th><th class="font-medium"
+						>url</th
+					></tr
+				></thead
+			>
+			<tbody>
+				{#each supportedPackages as pkg}
+					<tr
+						><td class="border-r border-black pr-2 underline text-indigo-700 hover:text-indigo-500"
+							><a href={pkg.link}>{pkg.name}</a></td
+						><td class="pl-2 text-sm">{pkg.desc}</td></tr
+					>
+				{/each}
+			</tbody>
+		</table>
 		<div class="w-full border-b border-gray-500 my-2" />
 		<input
 			type="text"
