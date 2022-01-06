@@ -24,7 +24,7 @@ struct SatyTemplate {
 }
 
 pub struct Config {
-    pub capacity: usize,
+    pub capacity: u64,
     pub workdir: String,
     pub satysfi: String,
     pub pdftoppm: String,

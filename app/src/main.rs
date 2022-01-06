@@ -48,7 +48,7 @@ struct Config {
     pub pdftoppm: String,
     pub satyh: String,
     pub workdir: String,
-    pub capacity: usize,
+    pub capacity: u64,
     pub sock: SockInfo,
     pub healthcheck_sock: SockInfo,
 }
