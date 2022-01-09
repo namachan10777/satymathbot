@@ -148,7 +148,7 @@
 			<thead
 				><tr class="border-b border-black"
 					><th class="border-r border-black pr-2 font-medium">name</th><th class="font-medium"
-						>url</th
+						>description</th
 					></tr
 				></thead
 			>
