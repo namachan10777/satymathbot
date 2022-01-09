@@ -76,13 +76,14 @@
 
 	async function request(): Promise<ImgState> {
 		let url = mathURL;
+		const newFetchAbortController = new AbortController();
+		const res = await fetch(mathURL, {
+			signal: newFetchAbortController.signal
+		});
 		if (fetchAbortController) {
 			fetchAbortController.abort();
 		}
-		fetchAbortController = new AbortController();
-		const res = await fetch(mathURL, {
-			signal: fetchAbortController.signal
-		});
+		fetchAbortController = newFetchAbortController;
 		if (res.ok && res.url === url) {
 			const blob = await res.blob();
 			return {
