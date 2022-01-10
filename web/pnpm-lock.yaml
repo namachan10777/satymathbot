@@ -3,7 +3,7 @@ lockfileVersion: 5.3
 specifiers:
   '@fontsource/fira-mono': 4.5.0
   '@lukeed/uuid': 2.0.0
-  '@sveltejs/adapter-static': 1.0.0-next.25
+  '@sveltejs/adapter-static': 1.0.0-next.26
   '@sveltejs/kit': next
   '@types/cookie': 0.4.1
   '@typescript-eslint/eslint-plugin': 5.9.1
@@ -29,8 +29,8 @@ dependencies:
   cookie: 0.4.1
 
 devDependencies:
-  '@sveltejs/adapter-static': 1.0.0-next.25
-  '@sveltejs/kit': 1.0.0-next.219_svelte@3.45.0
+  '@sveltejs/adapter-static': 1.0.0-next.26
+  '@sveltejs/kit': 1.0.0-next.221_svelte@3.45.0
   '@types/cookie': 0.4.1
   '@typescript-eslint/eslint-plugin': 5.9.1_bd2fd93dbcc607ad2f21b784bccfe0c8
   '@typescript-eslint/parser': 5.9.0_eslint@8.6.0+typescript@4.5.4
@@ -148,14 +148,14 @@ packages:
       picomatch: 2.3.0
     dev: true
 
-  /@sveltejs/adapter-static/1.0.0-next.25:
-    resolution: {integrity: sha512-ZKkiMOLdm5mSoivB8KAwEFPdF+Y6MhwLUGXIe13LUaQ5PGOdl48uLKMS2sxxttRQUFYSmQbgIQR0nMv9yp1NPA==}
+  /@sveltejs/adapter-static/1.0.0-next.26:
+    resolution: {integrity: sha512-LXR0HkPygZ+m9wJhFqbYWbJ0jquhgUK6vL/8AwnqbAZGGtQFloMpf49WOANk7MiLBeY6L97W5jPLSxHiDW3T0Q==}
     dependencies:
       tiny-glob: 0.2.9
     dev: true
 
-  /@sveltejs/kit/1.0.0-next.219_svelte@3.45.0:
-    resolution: {integrity: sha512-mkelJ4FoE9otsAePHwW0v75uTGsz8XOilEzM3fryNJlZ0K4cTlqh1u8ajQeO5g/PI+PhE52DozAKjydCbrKgyA==}
+  /@sveltejs/kit/1.0.0-next.221_svelte@3.45.0:
+    resolution: {integrity: sha512-vKok5MdAjkXeql4pjBAotaO3Yp0oTJJI0SIAB1skZiHnW0Ja2AMFZBFGaNhFLNhG+qP+k4NNn9utMifpvY8NbQ==}
     engines: {node: '>=14.13'}
     hasBin: true
     peerDependencies:
