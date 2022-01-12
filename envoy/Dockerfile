@@ -1,4 +1,4 @@
-FROM envoyproxy/envoy:v1.20.1
+FROM envoyproxy/envoy:v1.21.0
 
 COPY files/etc/envoy /etc/envoy
 
