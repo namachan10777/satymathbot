@@ -1,4 +1,4 @@
-FROM ocaml/opam:ubuntu-21.04-ocaml-4.10 as satysfi-builder
+FROM ocaml/opam:ubuntu-22.10-ocaml-4.10 as satysfi-builder
 RUN opam repository add satysfi-external https://github.com/gfngfn/satysfi-external-repo.git
 RUN opam repository add satyrographos https://github.com/na4zagin3/satyrographos-repo.git
 RUN opam update
@@ -24,7 +24,7 @@ COPY templates /work/templates
 RUN sed -ie 's#dummy.rs#src/main.rs#g' Cargo.toml
 RUN cargo build --release
 
-FROM public.ecr.aws/ubuntu/ubuntu:21.04
+FROM public.ecr.aws/ubuntu/ubuntu:22.10
 RUN apt-get update && apt-get install -y poppler-utils libjpeg-dev sudo
 COPY ./satysfi/empty.satyh /etc/satymathbot/empty.satyh
 COPY ./prod.ron /etc/satymathbot/config.ron
