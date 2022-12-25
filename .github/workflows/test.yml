@@ -1,14 +1,39 @@
 name: Test
 on: [push, pull_request]
 jobs:
+  frontend:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        node-version: [18]
+    steps:
+    - uses: actions/checkout@v3
+    - uses: pnpm/action-setup@v2
+      with:
+        version: 7
+      working-directory: web
+    - uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'pnpm'
+      working-directory: web
+    - name: Install
+      run: pnpm install --frozen-lockfile
+      working-directory: web
+    - name: Check
+      run: pnpm run check
+      working-directory: web
+    - name: Build test
+      run: pnpm run build
+      working-directory: web
   test:
     runs-on: ubuntu-20.04
     permissions:
       id-token: write
       contents: read
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/cache@v2
+    - uses: actions/checkout@v3
+    - uses: actions/cache@v3
       with:
         path: |
           ~/.cargo/registry
@@ -20,8 +45,6 @@ jobs:
         toolchain: stable
         override: true
         components: rustfmt, clippy
-    - name: Install jsonnet
-      uses: kobtea/setup-jsonnet-action@v1
     - name: Build
       run: cargo build --verbose
       working-directory: app
