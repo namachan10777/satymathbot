@@ -11,12 +11,11 @@ jobs:
     - uses: pnpm/action-setup@v2
       with:
         version: 7
-      working-directory: web
     - uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'pnpm'
-      working-directory: web
+        cache-dependency-path: '**/pnpm-lock.yaml'
     - name: Install
       run: pnpm install --frozen-lockfile
       working-directory: web
@@ -26,7 +25,7 @@ jobs:
     - name: Build test
       run: pnpm run build
       working-directory: web
-  test:
+  backend:
     runs-on: ubuntu-20.04
     permissions:
       id-token: write
