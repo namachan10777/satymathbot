@@ -7,9 +7,12 @@ phases:
   install:
     runtime-versions:
       docker: 19
+    commands:
+      - wget https://github.com/earthly/earthly/releases/download/v0.6.30/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod +x /usr/local/bin/earthly
   pre_build:
     commands:
       - $(aws ecr get-login --no-include-email)
   build:
     commands:
-      bash ./ci/build_and_push.sh
+      - earthly --version
+      - earthly --ci --push +images --tag=$(git rev-parse HEAD)

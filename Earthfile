@@ -6,23 +6,33 @@ IMPORT ./app
 IMPORT ./web
 
 app:
+	ARG repo
+	ARG tag
 	FROM app+image
 	SAVE IMAGE $repo/satymathbot-app:$tag
 
 
 envoy:
+	ARG repo
+	ARG tag
 	FROM envoy+image
 	SAVE IMAGE $repo/satymathbot-envoy:$tag
 
 web:
+	ARG repo
+	ARG tag
 	FROM web+image
 	SAVE IMAGE $repo/satymathbot-web:$tag
 
 promtail:
+	ARG repo
+	ARG tag
 	FROM promtail+image
 	SAVE IMAGE $repo/satymathbot-promtail:$tag
 
 prometheus:
+	ARG repo
+	ARG tag
 	FROM prometheus+image
 	SAVE IMAGE $repo/satymathbot-prometheus:$tag
 
@@ -30,7 +40,7 @@ images:
 	ARG repo=966924987919.dkr.ecr.ap-northeast-1.amazonaws.com
 	ARG tag=latest
 	BUILD +app        --repo=$repo --tag=$tag
-	BUILD +app        --repo=$repo --tag=$tag
+	BUILD +app        --repo=$repo --tag=latest
 	BUILD +envoy      --repo=$repo --tag=$tag
 	BUILD +envoy      --repo=$repo --tag=latest
 	BUILD +web        --repo=$repo --tag=$tag
