@@ -10,6 +10,7 @@ svelte:
     COPY . /work
     RUN pnpm build
     SAVE ARTIFACT build /build
+    SAVE IMAGE --cache-hint
 
 image:
     FROM public.ecr.aws/docker/library/nginx:latest
