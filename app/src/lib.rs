@@ -1,5 +1,5 @@
 use askama::Template;
-use axum::extract::{Extension, Path};
+use axum::extract::{Path, State};
 use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
 use image::{DynamicImage, GenericImageView, ImageOutputFormat, Pixel, Rgba, RgbaImage};
@@ -23,6 +23,7 @@ struct SatyTemplate {
     math: String,
 }
 
+#[derive(Clone)]
 pub struct Config {
     pub capacity: u64,
     pub workdir: String,
@@ -30,15 +31,16 @@ pub struct Config {
     pub pdftoppm: String,
 }
 
-pub struct State {
-    math: Cache<String, MathState>,
+#[derive(Clone)]
+pub struct AppState {
+    math: Arc<Cache<String, MathState>>,
     cfg: Config,
 }
 
-impl State {
+impl AppState {
     pub fn new(cfg: Config) -> Self {
         Self {
-            math: Cache::new(cfg.capacity),
+            math: Arc::new(Cache::new(cfg.capacity)),
             cfg,
         }
     }
@@ -185,7 +187,7 @@ fn alpha(img: &mut RgbaImage) {
     }
 }
 
-async fn handle(state: Arc<State>, query: Query) -> Result<MathState, Arc<Error>> {
+async fn handle(state: AppState, query: Query) -> Result<MathState, Arc<Error>> {
     let base64_math = query.base64();
     let math = base64::decode_config(&base64_math, base64::URL_SAFE)
         .map_err(|e| Error::BadRequest(BadRequest::Base64(e)))?;
@@ -332,7 +334,7 @@ fn image_response(
 }
 
 pub async fn endpoint(
-    Extension(state): Extension<Arc<State>>,
+    State(state): State<AppState>,
     axum::extract::Query(params): axum::extract::Query<URLQuery>,
     Path(file_name): Path<String>,
 ) -> impl IntoResponse {

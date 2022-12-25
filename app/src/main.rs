@@ -8,7 +8,6 @@ use std::fmt::Display;
 use std::os::unix::fs::MetadataExt;
 use std::path::Path;
 use std::process::exit;
-use std::sync::Arc;
 use std::{net::SocketAddr, path::PathBuf};
 use tokio::{fs, io};
 use tracing::{error, info};
@@ -182,10 +181,10 @@ async fn run_hyper_server(sock: &SockInfo, router: Router) -> Result<(), Error> 
 
 async fn run_app_server(sock: &SockInfo, cfg: satymathbot::Config) -> Result<(), Error> {
     prepare_sock(sock).await?;
-    let state = Arc::new(satymathbot::State::new(cfg));
+    let state = satymathbot::AppState::new(cfg);
     let app = axum::Router::new()
         .route("/:file", routing::get(satymathbot::endpoint))
-        .layer(axum::AddExtensionLayer::new(state));
+        .with_state(state);
     run_hyper_server(sock, app).await
 }
 
