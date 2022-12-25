@@ -262,10 +262,7 @@ async fn handle(state: AppState, query: Query) -> Result<MathState, Arc<Error>> 
         alpha(&mut img);
         Ok(MathState::Ready { img })
     };
-    state
-        .math
-        .get_or_try_insert_with(base64_math.to_owned(), proc)
-        .await
+    state.math.try_get_with(base64_math.to_owned(), proc).await
 }
 
 pub enum PrepareError {
