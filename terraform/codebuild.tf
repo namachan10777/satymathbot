@@ -91,10 +91,10 @@ resource "aws_codebuild_project" "satymathbot" {
   }
 }
 
-module "oidc-provider-data" {
-  source     = "reegnz/oidc-provider-data/aws"
-  version    = "0.0.3"
-  issuer_url = "https://token.actions.githubusercontent.com"
+resource "aws_iam_openid_connect_provider" "github-actions" {
+  url             = "https://token.actions.githubusercontent.com"
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
 }
 
 data "aws_iam_policy_document" "github-actions-assume-role" {
@@ -102,7 +102,7 @@ data "aws_iam_policy_document" "github-actions-assume-role" {
     effect = "Allow"
     principals {
       type        = "Federated"
-      identifiers = ["${module.oidc-provider-data.arn}"]
+      identifiers = [aws_iam_openid_connect_provider.github-actions.arn]
     }
     actions = ["sts:AssumeRoleWithWebIdentity"]
 
