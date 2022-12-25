@@ -1,6 +1,6 @@
 VERSION 0.6
 image:
-	FROM envoyproxy/envoy:v1.21.0
+	FROM envoyproxy/envoy:v1.24.0
 
 	COPY files/etc/envoy /etc/envoy
 

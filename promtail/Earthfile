@@ -4,7 +4,7 @@ image:
 
 	RUN uname -m | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/' > ~/.arch
 	RUN apt-get update && apt-get install -y curl unzip
-	RUN curl -L https://github.com/grafana/loki/releases/download/v2.4.1/promtail-linux-$(cat ~/.arch).zip -o /root/promtail.zip
+	RUN curl -L https://github.com/grafana/loki/releases/download/v2.7.1/promtail-linux-$(cat ~/.arch).zip -o /root/promtail.zip
 	RUN unzip /root/promtail.zip -d /usr/local/bin
 	RUN mv /usr/local/bin/promtail-linux-$(cat ~/.arch) /usr/local/bin/promtail
 	COPY config.yml /etc/promtail/config.yml

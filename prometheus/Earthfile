@@ -1,7 +1,7 @@
 VERSION 0.6
 
 image:
-	FROM quay.io/prometheus/prometheus:v2.32.1
+	FROM quay.io/prometheus/prometheus:v2.41.0
 
 	COPY prometheus.yml /etc/prometheus/prometheus.yml
 
