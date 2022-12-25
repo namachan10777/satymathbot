@@ -9,11 +9,13 @@ RUN pnpm build
 
 FROM public.ecr.aws/docker/library/nginx:1.21.4
 
+
+RUN groupadd -g 1000 satymathbot && useradd -rm -s /bin/bash -u 1000 -g satymathbot satymathbot
 RUN touch /var/run/nginx.pid && \
-    chown -R nginx:nginx /var/run/nginx.pid && \
-    chown -R nginx:nginx /var/cache/nginx
+    chown -R satymathbot:satymathbot /var/run/nginx.pid && \
+    chown -R satymathbot:satymathbot /var/cache/nginx
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY --from=builder /work/build /web
 
-USER nginx
+USER satymathbot

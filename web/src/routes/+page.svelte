@@ -3,6 +3,8 @@
 </script>
 
 <script lang="ts">
+	import base64 from 'base64-js';
+
 	// type definitions
 	type ImgState =
 		| {
@@ -50,7 +52,10 @@
 		{ name: 'matrix', link: 'https://github.com/nekketsuuu/satysfi-matrix', desc: 'matrix' }
 	];
 	function createMathURL(math: string, format: string, color: string): string {
-		return `https://satymathbot.net/m/${encodeURIComponent(math)}.${format}?color=${color}`;
+		let encoder = new TextEncoder();
+		let utf8 = encoder.encode(math);
+		let base64str = base64.fromByteArray(utf8);
+		return `https://satymathbot.net/m/${base64str}.${format}?color=${color}`;
 	}
 
 	// state

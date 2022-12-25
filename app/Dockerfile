@@ -33,7 +33,7 @@ COPY --from=satysfi-builder /home/opam/.opam/4.10/share/satysfi /home/opam/.opam
 COPY --from=satysfi-builder /home/opam/.opam/4.10/bin/satysfi /usr/local/bin/satysfi
 COPY ./entry.sh /usr/local/bin/entry.sh
 
-RUN groupadd -g 101 satymathbot && useradd -rm -s /bin/bash -u 101 -g satymathbot satymathbot
+RUN groupadd -g 1000 satymathbot && useradd -rm -s /bin/bash -u 1000 -g satymathbot satymathbot
 
 COPY --from=satysfi-builder /home/opam/.satysfi/ /home/satymathbot/.satysfi
 
