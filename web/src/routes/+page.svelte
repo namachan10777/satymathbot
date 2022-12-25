@@ -49,15 +49,8 @@
 		{ name: 'uline', link: 'https://github.com/puripuri2100/SATySFi-uline', desc: 'underline' },
 		{ name: 'matrix', link: 'https://github.com/nekketsuuu/satysfi-matrix', desc: 'matrix' }
 	];
-
-	// helper functions
-	function base64Encode(src: string) {
-		const binStr = unescape(encodeURIComponent(src));
-		const rawBase64 = btoa(binStr);
-		return rawBase64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-	}
 	function createMathURL(math: string, format: string, color: string): string {
-		return `https://satymathbot.net/m/${base64Encode(math)}.${format}?color=${color}`;
+		return `https://satymathbot.net/m/${encodeURIComponent(math)}.${format}?color=${color}`;
 	}
 
 	// state

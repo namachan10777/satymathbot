@@ -1,0 +1,19 @@
+{
+  "0 debug pnpm:scope": {
+    "selected": 1
+  },
+  "1 error pnpm": {
+    "errno": 1,
+    "code": "ELIFECYCLE",
+    "pkgid": "satymathbot-web@0.0.1",
+    "stage": "check",
+    "script": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "pkgname": "satymathbot-web",
+    "err": {
+      "name": "pnpm",
+      "message": "satymathbot-web@0.0.1 check: `svelte-kit sync && svelte-check --tsconfig ./tsconfig.json`\nExit status 1",
+      "code": "ELIFECYCLE",
+      "stack": "pnpm: satymathbot-web@0.0.1 check: `svelte-kit sync && svelte-check --tsconfig ./tsconfig.json`\nExit status 1\n    at EventEmitter.<anonymous> (/Users/namachan/.npm-packages/lib/node_modules/pnpm/dist/pnpm.cjs:106732:20)\n    at EventEmitter.emit (node:events:513:28)\n    at ChildProcess.<anonymous> (/Users/namachan/.npm-packages/lib/node_modules/pnpm/dist/pnpm.cjs:93301:18)\n    at ChildProcess.emit (node:events:513:28)\n    at maybeClose (node:internal/child_process:1091:16)\n    at ChildProcess._handle.onexit (node:internal/child_process:302:5)"
+    }
+  }
+}
