@@ -126,7 +126,7 @@ fn from_hex(input: &str) -> Result<u8, std::num::ParseIntError> {
 }
 
 fn is_hex_digit(c: char) -> bool {
-    c.is_digit(16)
+    c.is_ascii_hexdigit()
 }
 
 fn hex_primary(input: &str) -> IResult<&str, u8> {
@@ -189,7 +189,7 @@ fn alpha(img: &mut RgbaImage) {
 
 async fn handle(state: AppState, query: Query) -> Result<MathState, Arc<Error>> {
     let base64_math = query.base64();
-    let math = base64::decode_config(&base64_math, base64::URL_SAFE)
+    let math = base64::decode_config(base64_math, base64::URL_SAFE)
         .map_err(|e| Error::BadRequest(BadRequest::Base64(e)))?;
     let math = String::from_utf8(math).map_err(|e| Error::BadRequest(BadRequest::NoUnicode(e)))?;
     let proc = async {
