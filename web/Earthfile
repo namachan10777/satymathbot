@@ -1,0 +1,25 @@
+VERSION 0.6
+
+svelte:
+    FROM public.ecr.aws/docker/library/node:stretch-slim
+    WORKDIR /work
+    RUN npm i -g pnpm
+    COPY package.json /work/
+    COPY pnpm-lock.yaml /work/
+    RUN pnpm i --frozen-lockfile
+    COPY . /work
+    RUN pnpm build
+    SAVE ARTIFACT build /build
+
+image:
+    FROM public.ecr.aws/docker/library/nginx:1.21.4
+
+    RUN groupadd -g 1000 satymathbot && useradd -rm -s /bin/bash -u 1000 -g satymathbot satymathbot
+    RUN touch /var/run/nginx.pid && \
+        chown -R satymathbot:satymathbot /var/run/nginx.pid && \
+        chown -R satymathbot:satymathbot /var/cache/nginx
+
+    COPY nginx.conf /etc/nginx/nginx.conf
+    COPY +svelte/build /web
+
+    USER satymathbot
