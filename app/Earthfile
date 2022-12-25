@@ -37,7 +37,7 @@ satymathbot:
 
 image:
     FROM public.ecr.aws/ubuntu/ubuntu:22.10
-    RUN apt-get update && apt-get upgrade -y && apt-get install -y poppler-utils libjpeg-dev
+    RUN apt-get update && apt-get upgrade -y && apt-get install -y poppler-utils libjpeg-dev sudo
     COPY +satymathbot/bin /usr/local/bin/satymathbot
     COPY +satysfi/bin /usr/local/bin/satysfi
     COPY +satysfi/share /home/opam/.opam/4.10/share/satysfi
