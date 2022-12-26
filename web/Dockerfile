@@ -7,7 +7,7 @@ RUN pnpm i
 COPY . /work
 RUN pnpm build
 
-FROM public.ecr.aws/docker/library/nginx:1.21.4
+FROM public.ecr.aws/docker/library/nginx:1.23.3
 
 
 RUN groupadd -g 1000 satymathbot && useradd -rm -s /bin/bash -u 1000 -g satymathbot satymathbot
