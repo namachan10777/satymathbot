@@ -1,8 +1,10 @@
 name: CodeBuild
 on:
   push:
-    branches:
-      - main
+    tags:
+      - '*'
+    branches-ignore:
+      - '**'
 jobs:
   codebuild:
     runs-on: ubuntu-20.04
