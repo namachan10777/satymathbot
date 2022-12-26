@@ -6,6 +6,7 @@ use base64::alphabet;
 use base64::engine::fast_portable;
 use image::{DynamicImage, GenericImageView, ImageOutputFormat, Pixel, Rgba, RgbaImage};
 use moka::future::Cache;
+use std::io::Cursor;
 use std::process::ExitStatus;
 use std::string;
 use std::sync::Arc;
@@ -90,7 +91,7 @@ fn detect_rendered_area(image: &DynamicImage) -> Option<Area> {
     let (w, h) = image.dimensions();
     for x in 0..w {
         for y in 0..h {
-            let r = image.get_pixel(x, y).to_rgb().channels4().0;
+            let r = image.get_pixel(x, y).to_rgb().channels()[0];
             if r < 240 {
                 min_x = min_x.min(x);
                 max_x = max_x.max(x);
@@ -324,7 +325,7 @@ fn image_response(
 ) -> (StatusCode, HeaderMap, Vec<u8>) {
     let mut png = Vec::new();
     convert(&mut img, color);
-    if let Err(e) = DynamicImage::ImageRgba8(img).write_to(&mut png, format) {
+    if let Err(e) = DynamicImage::ImageRgba8(img).write_to(&mut Cursor::new(&mut png), format) {
         return text_response(
             &format!("failed to encode png: {:?}", e),
             StatusCode::INTERNAL_SERVER_ERROR,
