@@ -9,32 +9,32 @@ app:
 	ARG repo
 	ARG tag
 	FROM app+image
-	SAVE IMAGE $repo/satymathbot-app:$tag
+	SAVE IMAGE --push $repo/satymathbot-app:$tag
 
 
 envoy:
 	ARG repo
 	ARG tag
 	FROM envoy+image
-	SAVE IMAGE $repo/satymathbot-envoy:$tag
+	SAVE IMAGE --push $repo/satymathbot-envoy:$tag
 
 web:
 	ARG repo
 	ARG tag
 	FROM web+image
-	SAVE IMAGE $repo/satymathbot-web:$tag
+	SAVE IMAGE --push $repo/satymathbot-web:$tag
 
 promtail:
 	ARG repo
 	ARG tag
 	FROM promtail+image
-	SAVE IMAGE $repo/satymathbot-promtail:$tag
+	SAVE IMAGE --push $repo/satymathbot-promtail:$tag
 
 prometheus:
 	ARG repo
 	ARG tag
 	FROM prometheus+image
-	SAVE IMAGE $repo/satymathbot-prometheus:$tag
+	SAVE IMAGE --push $repo/satymathbot-prometheus:$tag
 
 images:
 	ARG repo=966924987919.dkr.ecr.ap-northeast-1.amazonaws.com
