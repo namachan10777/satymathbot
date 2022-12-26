@@ -1,7 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@fontsource/fira-mono': 4.5.0
+  '@fontsource/fira-mono': 4.5.10
   '@lukeed/uuid': 2.0.0
   '@sveltejs/adapter-static': ^1.0.0
   '@sveltejs/kit': ^1.0.1
@@ -25,7 +25,7 @@ specifiers:
   vite: ^4.0.3
 
 dependencies:
-  '@fontsource/fira-mono': 4.5.0
+  '@fontsource/fira-mono': 4.5.10
   '@lukeed/uuid': 2.0.0
   base64-js: 1.5.1
   cookie: 0.4.1
@@ -267,8 +267,8 @@ packages:
       - supports-color
     dev: true
 
-  /@fontsource/fira-mono/4.5.0:
-    resolution: {integrity: sha512-KE+d3wmgq/YKM0BqgUF7p2yeBNi805Nfof1lC1wJ7E9i2EWoC363sGdKG+MQBVm+ei3GYZu+Bo8Xha1w1pkB7g==}
+  /@fontsource/fira-mono/4.5.10:
+    resolution: {integrity: sha512-bxUnRP8xptGRo8YXeY073DSpfK74XpSb0ZyRNpHV9WvLnJ7TwPOjZll8hTMin7zLC6iOp59pDZ8EQDj1gzgAQQ==}
     dev: false
 
   /@humanwhocodes/config-array/0.11.8:
