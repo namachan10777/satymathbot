@@ -39,6 +39,8 @@ static_resources:
                 route: { cluster: satymathbot }
           http_filters:
           - name: envoy.filters.http.router
+            typed_config:
+             "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
   - name: satymathbot-health
     address:
       socket_address: { address: 0.0.0.0, port_value: 8081 }
@@ -75,6 +77,8 @@ static_resources:
                 route: { cluster: satymathbot-health }
           http_filters:
           - name: envoy.filters.http.router
+            typed_config:
+             "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
   clusters:
   - name: satymathbot
     connect_timeout: 0.25s
