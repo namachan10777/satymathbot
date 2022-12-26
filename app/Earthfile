@@ -41,7 +41,7 @@ image:
     COPY +satymathbot/bin /usr/local/bin/satymathbot
     COPY +satysfi/bin /usr/local/bin/satysfi
     COPY +satysfi/share /home/opam/.opam/4.10/share/satysfi
-    COPY +satysfi/dist /home/satymathbot/.dist
+    COPY +satysfi/dist /home/satymathbot/.satysfi/dist
     COPY prod.ron /etc/satymathbot/config.ron
     COPY satysfi/empty.satyh /etc/satymathbot/empty.satyh
     COPY entry.sh /usr/local/bin/entry.sh

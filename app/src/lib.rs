@@ -194,7 +194,7 @@ async fn handle(state: AppState, query: Query) -> Result<MathState, Arc<Error>> 
     let base64_math = query.base64();
     let math = base64::decode_engine(
         base64_math,
-        &fast_portable::FastPortable::from(&alphabet::URL_SAFE, fast_portable::NO_PAD),
+        &fast_portable::FastPortable::from(&alphabet::URL_SAFE, fast_portable::PAD),
     )
     .map_err(|e| Error::BadRequest(BadRequest::Base64(e)))?;
     let math = String::from_utf8(math).map_err(|e| Error::BadRequest(BadRequest::NoUnicode(e)))?;
