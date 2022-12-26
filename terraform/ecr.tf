@@ -45,7 +45,7 @@ locals {
 }
 
 locals {
-  repositories = toset(["app", "web", "envoy", "promtail", "prometheus", "cache"])
+  repositories = toset(["app", "web", "envoy", "promtail", "prometheus"])
 }
 
 resource "aws_ecr_repository" "satymathbot" {

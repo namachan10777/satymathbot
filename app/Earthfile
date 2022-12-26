@@ -20,13 +20,11 @@ satysfi:
     SAVE ARTIFACT /home/opam/.opam/4.10/share/satysfi /share
     SAVE ARTIFACT /home/opam/.satysfi/dist /dist
     SAVE ARTIFACT /home/opam/.opam/4.10/bin/satysfi /bin
-    SAVE IMAGE --cache-hint
 
 plan:
     COPY Cargo.* .
     RUN cargo chef prepare --recipe-path recipe.json
     SAVE ARTIFACT recipe.json /recipe.json
-    SAVE IMAGE --cache-hint
 
 satymathbot:
     COPY +plan/recipe.json .
@@ -36,7 +34,6 @@ satymathbot:
     RUN cargo build --release
     RUN strip target/release/satymathbot
     SAVE ARTIFACT target/release/satymathbot /bin
-    SAVE IMAGE --cache-hint
 
 image:
     FROM public.ecr.aws/ubuntu/ubuntu:22.10

@@ -15,4 +15,4 @@ phases:
   build:
     commands:
       - earthly --version
-      - earthly --ci --push --remote-cache=966924987919.dkr.ecr.ap-northeast-1.amazonaws.com/satymathbot-cache:cache +images --tag=$(git rev-parse HEAD)
+      - earthly --ci --push +images --tag=$(git rev-parse HEAD)
