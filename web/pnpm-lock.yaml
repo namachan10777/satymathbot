@@ -20,7 +20,7 @@ specifiers:
   svelte: ^3.54.0
   svelte-check: ^3.0.0
   tailwindcss: 3.2.4
-  tslib: 2.3.1
+  tslib: 2.4.1
   typescript: 4.9.4
   vite: ^4.0.3
 
@@ -46,7 +46,7 @@ devDependencies:
   svelte: 3.55.0
   svelte-check: 3.0.1_qs7rgzvahok4cbkjoy5bgypde4
   tailwindcss: 3.2.4_postcss@8.4.20
-  tslib: 2.3.1
+  tslib: 2.4.1
   typescript: 4.9.4
   vite: 4.0.3
 
@@ -1905,8 +1905,8 @@ packages:
     resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
     dev: true
 
-  /tslib/2.3.1:
-    resolution: {integrity: sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==}
+  /tslib/2.4.1:
+    resolution: {integrity: sha512-tGyy4dAjRIEwI7BzsB0lynWgOpfqjUdq91XXAlIWD2OwKBH7oCl/GZG/HT4BOHrTlPMOASlMQ7veyTqpmRcrNA==}
     dev: true
 
   /tsutils/3.21.0_typescript@4.9.4:
