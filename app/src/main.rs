@@ -73,7 +73,7 @@ enum Error {
     UnixDomainSocketServer(String, hyper::Error),
     BindUnixDomainSocket(String, io::Error),
     ReadConfig(PathBuf, io::Error),
-    LoadConfig(ron::Error),
+    LoadConfig(ron::error::SpannedError),
     CreateWorkdir(String, io::Error),
     CopySatyh(String, String, io::Error),
 }
