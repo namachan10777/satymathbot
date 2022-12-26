@@ -15,7 +15,7 @@ anyhow = "1.0.68"
 askama = "0.11.1"
 axum = "0.6.1"
 base64 = "0.20.0"
-clap = {version = "3.2.23", features = ["derive"]}
+clap = {version = "4.0.32", features = ["derive"]}
 futures = "0.3.25"
 hyper = {version = "0.14.23", default-features = false}
 hyperlocal = "0.8.0"
