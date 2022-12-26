@@ -1,5 +1,5 @@
 use axum::{response::IntoResponse, routing, Json, Router};
-use clap::StructOpt;
+use clap::Parser;
 use futures::future::{select, Either};
 use futures::pin_mut;
 use hyperlocal::UnixServerExt;
@@ -14,7 +14,7 @@ use tracing::{error, info};
 
 #[derive(clap::Parser)]
 #[clap(about, version, author)]
-struct Parser {
+struct Opts {
     #[clap(
         short,
         long,
@@ -227,7 +227,7 @@ where
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
-    let opts = Parser::parse();
+    let opts = Opts::parse();
     match opts.serve {
         Some(cfg) => {
             if let Err(e) = serve(cfg).await {
