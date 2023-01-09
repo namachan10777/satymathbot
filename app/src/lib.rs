@@ -2,8 +2,8 @@ use askama::Template;
 use axum::extract::{Path, State};
 use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
-use base64::alphabet;
-use base64::engine::fast_portable;
+use base64::engine::general_purpose;
+use base64::{alphabet, Engine};
 use image::{DynamicImage, GenericImageView, ImageOutputFormat, Pixel, Rgba, RgbaImage};
 use moka::future::Cache;
 use std::io::Cursor;
@@ -192,11 +192,9 @@ fn alpha(img: &mut RgbaImage) {
 
 async fn handle(state: AppState, query: Query) -> Result<MathState, Arc<Error>> {
     let base64_math = query.base64();
-    let math = base64::decode_engine(
-        base64_math,
-        &fast_portable::FastPortable::from(&alphabet::URL_SAFE, fast_portable::PAD),
-    )
-    .map_err(|e| Error::BadRequest(BadRequest::Base64(e)))?;
+    let math = base64::engine::GeneralPurpose::new(&alphabet::URL_SAFE, general_purpose::PAD)
+        .decode(base64_math)
+        .map_err(|e| Error::BadRequest(BadRequest::Base64(e)))?;
     let math = String::from_utf8(math).map_err(|e| Error::BadRequest(BadRequest::NoUnicode(e)))?;
     let proc = async {
         let saty_path = format!("{}/{}.saty", state.cfg.workdir, base64_math);
