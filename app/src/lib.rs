@@ -287,7 +287,7 @@ pub async fn prepare(style_file: &str, workdir: &str) -> Result<(), PrepareError
             .await
             .map_err(|e| PrepareError::CreateDir(workdir.to_owned(), e))?;
     }
-    let to = format!("{}/empty.satyh", workdir);
+    let to = format!("{workdir}/empty.satyh");
     fs::copy(style_file, to.clone())
         .await
         .map(|_| ())
@@ -325,7 +325,7 @@ fn image_response(
     convert(&mut img, color);
     if let Err(e) = DynamicImage::ImageRgba8(img).write_to(&mut Cursor::new(&mut png), format) {
         return text_response(
-            &format!("failed to encode png: {:?}", e),
+            &format!("failed to encode png: {e:?}"),
             StatusCode::INTERNAL_SERVER_ERROR,
         );
     }
@@ -371,12 +371,12 @@ pub async fn endpoint(
         Err(e) => match e.as_ref() {
             Error::BadRequest(e) => {
                 info!("bad request: {:?}", e);
-                text_response(&format!("Error: {:?}", e), StatusCode::BAD_REQUEST)
+                text_response(&format!("Error: {e:?}"), StatusCode::BAD_REQUEST)
             }
             Error::Internal(e) => {
                 warn!("internal error: {:?}", e);
                 text_response(
-                    &format!("Error: {:?}", e),
+                    &format!("Error: {e:?}"),
                     StatusCode::INTERNAL_SERVER_ERROR,
                 )
             }
