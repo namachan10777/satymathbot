@@ -375,10 +375,7 @@ pub async fn endpoint(
             }
             Error::Internal(e) => {
                 warn!("internal error: {:?}", e);
-                text_response(
-                    &format!("Error: {e:?}"),
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                )
+                text_response(&format!("Error: {e:?}"), StatusCode::INTERNAL_SERVER_ERROR)
             }
         },
     }
