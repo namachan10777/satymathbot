@@ -3,7 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@fontsource/fira-mono': 4.5.10
   '@lukeed/uuid': 2.0.0
-  '@sveltejs/adapter-static': ^1.0.0
+  '@sveltejs/adapter-static': ^2.0.0
   '@sveltejs/kit': ^1.0.1
   '@types/cookie': 0.5.1
   '@typescript-eslint/eslint-plugin': 5.50.0
@@ -31,7 +31,7 @@ dependencies:
   cookie: 0.5.0
 
 devDependencies:
-  '@sveltejs/adapter-static': 1.0.0_@sveltejs+kit@1.0.1
+  '@sveltejs/adapter-static': 2.0.0_@sveltejs+kit@1.0.1
   '@sveltejs/kit': 1.0.1_svelte@3.55.0+vite@4.0.3
   '@types/cookie': 0.5.1
   '@typescript-eslint/eslint-plugin': 5.50.0_go4drrxstycfikanvu45pi4vgq
@@ -344,10 +344,10 @@ packages:
     resolution: {integrity: sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==}
     dev: true
 
-  /@sveltejs/adapter-static/1.0.0_@sveltejs+kit@1.0.1:
-    resolution: {integrity: sha512-ZrQhRgSa2TsH+zvrOIKpdVsAhExafpsn+w6Gv1WHzV76RZ2XOYFa8xi6hEzRjeeAL++ac0dsZHzp8M4X7YIabg==}
+  /@sveltejs/adapter-static/2.0.0_@sveltejs+kit@1.0.1:
+    resolution: {integrity: sha512-M9F8EyCIdVcpZu0zvS7U7v+rc7elNNDUkMHLsOkJYlfQ9rDdif3fqteMqddcrq1lFPEGH1ErdTjpsXdb3k1e8w==}
     peerDependencies:
-      '@sveltejs/kit': ^1.0.0
+      '@sveltejs/kit': ^1.5.0
     dependencies:
       '@sveltejs/kit': 1.0.1_svelte@3.55.0+vite@4.0.3
     dev: true
