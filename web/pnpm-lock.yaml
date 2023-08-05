@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   '@fontsource/fira-mono':
     specifier: 5.0.7
@@ -32,7 +36,7 @@ devDependencies:
     version: 6.2.1(eslint@8.46.0)(typescript@4.9.5)
   autoprefixer:
     specifier: 10.4.13
-    version: 10.4.13(postcss@8.4.21)
+    version: 10.4.13(postcss@8.4.27)
   eslint:
     specifier: 8.46.0
     version: 8.46.0
@@ -43,8 +47,8 @@ devDependencies:
     specifier: 4.0.0
     version: 4.0.0(eslint@8.46.0)(svelte@4.0.0)
   postcss:
-    specifier: 8.4.21
-    version: 8.4.21
+    specifier: 8.4.27
+    version: 8.4.27
   prettier:
     specifier: 3.0.1
     version: 3.0.1
@@ -56,7 +60,7 @@ devDependencies:
     version: 4.0.0
   svelte-check:
     specifier: ^3.0.0
-    version: 3.0.1(postcss@8.4.21)(svelte@4.0.0)
+    version: 3.0.1(postcss@8.4.27)(svelte@4.0.0)
   tailwindcss:
     specifier: 3.3.3
     version: 3.3.3
@@ -710,7 +714,7 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /autoprefixer@10.4.13(postcss@8.4.21):
+  /autoprefixer@10.4.13(postcss@8.4.27):
     resolution: {integrity: sha512-49vKpMqcZYsJjwotvt4+h/BCjJVnhGwcLpDt5xkcaOG3eLrG/HUYLagrihYsQ+qrIBgIzX1Rw7a6L8I/ZA1Atg==}
     engines: {node: ^10 || ^12 || >=14}
     hasBin: true
@@ -722,7 +726,7 @@ packages:
       fraction.js: 4.2.0
       normalize-range: 0.1.2
       picocolors: 1.0.0
-      postcss: 8.4.21
+      postcss: 8.4.27
       postcss-value-parser: 4.2.0
     dev: true
 
@@ -1497,12 +1501,6 @@ packages:
       thenify-all: 1.6.0
     dev: true
 
-  /nanoid@3.3.4:
-    resolution: {integrity: sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==}
-    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
-    hasBin: true
-    dev: true
-
   /nanoid@3.3.6:
     resolution: {integrity: sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -1690,15 +1688,6 @@ packages:
 
   /postcss-value-parser@4.2.0:
     resolution: {integrity: sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==}
-    dev: true
-
-  /postcss@8.4.21:
-    resolution: {integrity: sha512-tP7u/Sn/dVxK2NnruI4H9BG+x+Wxz6oeZ1cJ8P6G/PZY0IKk4k/63TDsQf2kQq3+qoJeLm2kIBUNlZe3zgb4Zg==}
-    engines: {node: ^10 || ^12 || >=14}
-    dependencies:
-      nanoid: 3.3.4
-      picocolors: 1.0.0
-      source-map-js: 1.0.2
     dev: true
 
   /postcss@8.4.27:
@@ -1933,7 +1922,7 @@ packages:
     engines: {node: '>= 0.4'}
     dev: true
 
-  /svelte-check@3.0.1(postcss@8.4.21)(svelte@4.0.0):
+  /svelte-check@3.0.1(postcss@8.4.27)(svelte@4.0.0):
     resolution: {integrity: sha512-7YpHYWv6V2qhcvVeAlXixUPAlpLCXB1nZEQK0EItB3PtuYmENhKclbc5uKSJTodTwWR1y+4stKGcbH30k6A3Yw==}
     hasBin: true
     peerDependencies:
@@ -1946,7 +1935,7 @@ packages:
       picocolors: 1.0.0
       sade: 1.8.1
       svelte: 4.0.0
-      svelte-preprocess: 5.0.0(postcss@8.4.21)(svelte@4.0.0)(typescript@4.9.5)
+      svelte-preprocess: 5.0.0(postcss@8.4.27)(svelte@4.0.0)(typescript@4.9.5)
       typescript: 4.9.5
     transitivePeerDependencies:
       - '@babel/core'
@@ -1969,7 +1958,7 @@ packages:
       svelte: 4.0.0
     dev: true
 
-  /svelte-preprocess@5.0.0(postcss@8.4.21)(svelte@4.0.0)(typescript@4.9.5):
+  /svelte-preprocess@5.0.0(postcss@8.4.27)(svelte@4.0.0)(typescript@4.9.5):
     resolution: {integrity: sha512-q7lpa7i2FBu8Pa+G0MmuQQWETBwCKgsGmuq1Sf6n8q4uaG9ZLcLP0Y+etC6bF4sE6EbLxfiI38zV6RfPe3RSfg==}
     engines: {node: '>= 14.10.0'}
     requiresBuild: true
@@ -2011,7 +2000,7 @@ packages:
       '@types/sass': 1.43.1
       detect-indent: 6.1.0
       magic-string: 0.27.0
-      postcss: 8.4.21
+      postcss: 8.4.27
       sorcery: 0.10.0
       strip-indent: 3.0.0
       svelte: 4.0.0
@@ -2193,7 +2182,7 @@ packages:
         optional: true
     dependencies:
       esbuild: 0.16.10
-      postcss: 8.4.21
+      postcss: 8.4.27
       resolve: 1.22.1
       rollup: 3.8.1
     optionalDependencies:
@@ -2236,7 +2225,3 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
     dev: true
-
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
