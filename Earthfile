@@ -4,6 +4,7 @@ IMPORT ./prometheus
 IMPORT ./envoy
 IMPORT ./app
 IMPORT ./web
+PROJECT namachan10777/satymathbot
 
 app:
 	ARG repo
