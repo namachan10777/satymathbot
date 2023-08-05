@@ -14,7 +14,7 @@ path = "src/main.rs"
 anyhow = "1.0.72"
 askama = "0.11.1"
 axum = "0.6.20"
-base64 = "0.21.0"
+base64 = "0.21.2"
 clap = {version = "4.1.6", features = ["derive"]}
 futures = "0.3.26"
 hyper = {version = "0.14.24", default-features = false}
