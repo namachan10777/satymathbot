@@ -1,5 +1,7 @@
 name: container build
-on: [push]
+on:
+  push:
+    branches: [ main ]
 jobs:
   earthly:
     runs-on: ubuntu-latest

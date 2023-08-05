@@ -7,6 +7,7 @@ svelte:
     COPY package.json /work/
     COPY pnpm-lock.yaml /work/
     RUN pnpm i --frozen-lockfile
+    SAVE IMAGE --cache-hint
     COPY . /work
     RUN pnpm build
     SAVE IMAGE --cache-hint
@@ -23,4 +24,3 @@ image:
     COPY nginx.conf /etc/nginx/nginx.conf
     COPY +svelte/build /web
     USER satymathbot
-    SAVE IMAGE --cache-hint

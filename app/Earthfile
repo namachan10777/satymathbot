@@ -14,11 +14,12 @@ satysfi:
     RUN apt-get update && apt-get install -y pkg-config
 
     USER opam
-    RUN opam install -y \
-        satysfi satysfi-dist satyrographos \
-        satysfi-siunitx satysfi-uline satysfi-matrix
-    RUN opam exec -- satyrographos install
+    RUN opam install -y satysfi satysfi-dist satyrographos
     SAVE IMAGE --cache-hint
+    RUN opam install -y \
+        satysfi-siunitx satysfi-uline satysfi-matrix
+    SAVE IMAGE --cache-hint
+    RUN opam exec -- satyrographos install
     SAVE ARTIFACT /home/opam/.opam/4.10/share/satysfi /share
     SAVE ARTIFACT /home/opam/.satysfi/dist /dist
     SAVE ARTIFACT /home/opam/.opam/4.10/bin/satysfi /bin
@@ -31,6 +32,7 @@ plan:
 satymathbot:
     COPY +plan/recipe.json .
     RUN cargo chef cook --release --recipe-path recipe.json
+    SAVE IMAGE --cache-hint
     COPY src src
     COPY templates templates
     RUN cargo build --release
@@ -56,4 +58,3 @@ image:
 
     ENTRYPOINT [ "/usr/local/bin/entry.sh" ]
     CMD [ "-s", "/etc/satymathbot/config.ron" ]
-    SAVE IMAGE --cache-hint
