@@ -37,7 +37,7 @@ prometheus:
 	FROM prometheus+image
 	SAVE IMAGE --push $repo/satymathbot-prometheus:$tag
 
-images:
+ci-pipeline:
 	ARG repo=966924987919.dkr.ecr.ap-northeast-1.amazonaws.com
 	ARG tag=latest
 	BUILD +app        --repo=$repo --tag=$tag
