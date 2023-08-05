@@ -26,6 +26,7 @@ satysfi:
 
 plan:
     COPY Cargo.* .
+    COPY src src
     RUN cargo chef prepare --recipe-path recipe.json
     SAVE ARTIFACT recipe.json /recipe.json
 
