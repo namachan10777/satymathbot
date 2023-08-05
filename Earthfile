@@ -17,7 +17,6 @@ app:
 	FROM app+image
 	SAVE IMAGE --push $repo/satymathbot-app:$tag
 
-
 envoy:
 	ARG repo
 	ARG tag
