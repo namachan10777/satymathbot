@@ -8,7 +8,7 @@ jobs:
       - name: Setup Earthly
         uses: earthly/actions-setup@v1.0.1
         with:
-          version: v0.6.20
+          version: v0.7.8
       - name: Login to ghcr.io
         uses: docker/login-action@v2.0.0
         with:
@@ -19,4 +19,4 @@ jobs:
         env:
           CACHE_REGISTRY: ghcr.io/${{ github.repository_owner }}/satymathbot:cache
         run: |
-          earthly --push --ci --repo=ghcr.io/namachan10777 --remote-cache="${CACHE_REGISTRY}" +images
+          earthly --push --ci --remote-cache="${CACHE_REGISTRY}" +images --repo=ghcr.io/namachan10777
