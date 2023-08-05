@@ -9,6 +9,7 @@ svelte:
     RUN pnpm i --frozen-lockfile
     COPY . /work
     RUN pnpm build
+    SAVE IMAEG --cache-hint
     SAVE ARTIFACT build /build
 
 image:

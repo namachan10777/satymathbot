@@ -2,6 +2,7 @@ VERSION 0.6
 FROM public.ecr.aws/docker/library/rust:latest
 RUN cargo install cargo-chef
 WORKDIR /work
+SAVE IMAEG --cache-hint
 
 satysfi:
     FROM ocaml/opam:ubuntu-22.10-ocaml-4.10
@@ -17,6 +18,7 @@ satysfi:
         satysfi satysfi-dist satyrographos \
         satysfi-siunitx satysfi-uline satysfi-matrix
     RUN opam exec -- satyrographos install
+    SAVE IMAEG --cache-hint
     SAVE ARTIFACT /home/opam/.opam/4.10/share/satysfi /share
     SAVE ARTIFACT /home/opam/.satysfi/dist /dist
     SAVE ARTIFACT /home/opam/.opam/4.10/bin/satysfi /bin
@@ -33,6 +35,7 @@ satymathbot:
     COPY templates templates
     RUN cargo build --release
     RUN strip target/release/satymathbot
+    SAVE IMAEG --cache-hint
     SAVE ARTIFACT target/release/satymathbot /bin
 
 image:
@@ -53,3 +56,4 @@ image:
 
     ENTRYPOINT [ "/usr/local/bin/entry.sh" ]
     CMD [ "-s", "/etc/satymathbot/config.ron" ]
+    SAVE IMAEG --cache-hint
