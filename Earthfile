@@ -6,6 +6,11 @@ IMPORT ./app
 IMPORT ./web
 PROJECT namachan10777/satymathbot
 
+ci-pipeline:
+	PIPELINE
+	TRIGGER push main
+	BUILD +images
+
 app:
 	ARG repo
 	ARG tag
@@ -37,7 +42,7 @@ prometheus:
 	FROM prometheus+image
 	SAVE IMAGE --push $repo/satymathbot-prometheus:$tag
 
-ci-pipeline:
+images:
 	ARG repo=966924987919.dkr.ecr.ap-northeast-1.amazonaws.com
 	ARG tag=latest
 	BUILD +app        --repo=$repo --tag=$tag
@@ -50,3 +55,4 @@ ci-pipeline:
 	BUILD +promtail   --repo=$repo --tag=latest
 	BUILD +prometheus --repo=$repo --tag=$tag
 	BUILD +prometheus --repo=$repo --tag=latest
+
