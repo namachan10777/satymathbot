@@ -5,7 +5,7 @@ WORKDIR /work
 SAVE IMAGE --cache-hint
 
 satysfi:
-    FROM ocaml/opam:ubuntu-22.10-ocaml-4.10
+    FROM ocaml/opam:ubuntu-23.10-ocaml-4.10
     RUN opam repository add satysfi-external https://github.com/gfngfn/satysfi-external-repo.git
     RUN opam repository add satyrographos https://github.com/na4zagin3/satyrographos-repo.git
     RUN opam update
@@ -42,7 +42,7 @@ satymathbot:
     SAVE ARTIFACT target/release/satymathbot /bin
 
 image:
-    FROM public.ecr.aws/ubuntu/ubuntu:22.10
+    FROM public.ecr.aws/ubuntu/ubuntu:23.04
     RUN apt-get update && apt-get upgrade -y && apt-get install -y poppler-utils libjpeg-dev sudo
     COPY +satymathbot/bin /usr/local/bin/satymathbot
     COPY +satysfi/bin /usr/local/bin/satysfi

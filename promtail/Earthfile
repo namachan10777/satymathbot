@@ -1,6 +1,6 @@
 VERSION 0.6
 image:
-	FROM public.ecr.aws/ubuntu/ubuntu:22.10
+	FROM public.ecr.aws/ubuntu/ubuntu:23.04
 
 	RUN uname -m | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/' > ~/.arch
 	RUN apt-get update && apt-get install -y curl unzip
