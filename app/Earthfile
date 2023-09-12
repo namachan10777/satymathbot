@@ -5,7 +5,7 @@ WORKDIR /work
 SAVE IMAGE --cache-hint
 
 satysfi:
-    FROM ocaml/opam:ubuntu-23.10-ocaml-4.10
+    FROM ocaml/opam:ubuntu-23.04-ocaml-4.10
     RUN opam repository add satysfi-external https://github.com/gfngfn/satysfi-external-repo.git
     RUN opam repository add satyrographos https://github.com/na4zagin3/satyrographos-repo.git
     RUN opam update
