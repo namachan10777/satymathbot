@@ -25,5 +25,5 @@ nom = "7.1.3"
 ron = "0.8.1"
 serde = {version = "1.0.189", features = ["derive"]}
 tokio = {version = "1.33.0", features = ["macros", "fs", "process", "io-util", "rt-multi-thread", "signal"]}
-tracing = "0.1.39"
+tracing = "0.1.40"
 tracing-subscriber = {version = "0.3.17", default-features = false, features = ["fmt"]}
