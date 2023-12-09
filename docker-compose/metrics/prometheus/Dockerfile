@@ -1,4 +1,4 @@
-FROM prom/prometheus:v2.47.2
+FROM prom/prometheus:v2.48.1
 
 COPY ./files/etc/prometheus /etc/prometheus
 
