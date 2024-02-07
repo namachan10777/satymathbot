@@ -26,8 +26,8 @@ devDependencies:
     specifier: ^1.22.4
     version: 1.22.4(svelte@4.1.2)(vite@4.4.8)
   '@types/cookie':
-    specifier: 0.5.4
-    version: 0.5.4
+    specifier: 0.6.0
+    version: 0.6.0
   '@typescript-eslint/eslint-plugin':
     specifier: 6.21.0
     version: 6.21.0(@typescript-eslint/parser@6.21.0)(eslint@8.53.0)(typescript@5.3.3)
@@ -497,6 +497,10 @@ packages:
 
   /@types/cookie@0.5.4:
     resolution: {integrity: sha512-7z/eR6O859gyWIAjuvBWFzNURmf2oPBmJlfVWkwehU5nzIyjwBsTh7WMmEEV4JFnHuQ3ex4oyTvfKzcyJVDBNA==}
+    dev: true
+
+  /@types/cookie@0.6.0:
+    resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
     dev: true
 
   /@types/estree@1.0.1:
