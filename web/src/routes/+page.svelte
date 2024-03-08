@@ -1,10 +1,5 @@
-<script context="module" lang="ts">
-	export const prerender = true;
-</script>
-
-<script lang="ts">
+<script type="module" lang="ts">
 	import base64 from 'base64-js';
-
 	// type definitions
 	type ImgState =
 		| {
@@ -132,7 +127,7 @@
 
 <section class="bg-gray-200 min-h-full flex flex-col justify-center">
 	<div
-		class="shadow-md rounded py-2 card-width-default mx-2 px-2 bg-white m-1 border flex flex-col items-center "
+		class="shadow-md rounded py-2 card-width-default mx-2 px-2 bg-white m-1 border flex flex-col items-center"
 	>
 		<h1 class="text-xl">SATyMathBot</h1>
 		<p>
