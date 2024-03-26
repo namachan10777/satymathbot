@@ -16,7 +16,7 @@ svelte:
 image:
     FROM public.ecr.aws/docker/library/nginx:latest
 
-    RUN groupadd -g 1000 satymathbot && useradd -rm -s /bin/bash -u 1000 -g satymathbot satymathbot
+    RUN groupadd -g 1234 satymathbot && useradd -rm -s /bin/bash -u 1234 -g satymathbot satymathbot
     RUN touch /var/run/nginx.pid && \
         chown -R satymathbot:satymathbot /var/run/nginx.pid && \
         chown -R satymathbot:satymathbot /var/cache/nginx

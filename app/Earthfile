@@ -52,7 +52,7 @@ image:
     COPY satysfi/empty.satyh /etc/satymathbot/empty.satyh
     COPY entry.sh /usr/local/bin/entry.sh
 
-    RUN groupadd -g 1000 satymathbot && useradd -rm -s /bin/bash -u 1000 -g satymathbot satymathbot
+    RUN groupadd -g 1234 satymathbot && useradd -rm -s /bin/bash -u 1234 -g satymathbot satymathbot
     RUN chown root:root /usr/local/bin/entry.sh && chmod 4755 /usr/local/bin/entry.sh
     RUN chown satymathbot:satymathbot /usr/local/bin/satymathbot && chmod 4755 /usr/local/bin/satymathbot
     VOLUME [ "/var/run/satymathbot" ]
