@@ -1,5 +1,23 @@
 {
-  "extends": [
-    "config:base"
+  "extends": ["config:base", ":timezone(Asia/Tokyo)"],
+  "labels": ["dependencies", "renovate"],
+  "schedule": ["after 10pm and before 5am"],
+  "dependencyDashboard": true,
+  "pin": {
+    "automerge": true
+  },
+  "npm": {
+    "rangeStrategy": "bump"
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
+  },
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "major"],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true
+    }
   ]
 }
