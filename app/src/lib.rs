@@ -4,7 +4,7 @@ use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
 use base64::engine::general_purpose;
 use base64::{alphabet, Engine};
-use image::{DynamicImage, GenericImageView, ImageOutputFormat, Pixel, Rgba, RgbaImage};
+use image::{DynamicImage, GenericImageView, ImageFormat, Pixel, Rgba, RgbaImage};
 use moka::future::Cache;
 use std::io::Cursor;
 use std::process::ExitStatus;
@@ -319,7 +319,7 @@ fn image_response(
     mut img: RgbaImage,
     color: TextColor,
     mime: &'static str,
-    format: ImageOutputFormat,
+    format: ImageFormat,
 ) -> (StatusCode, HeaderMap, Vec<u8>) {
     let mut png = Vec::new();
     convert(&mut img, color);
@@ -361,10 +361,10 @@ pub async fn endpoint(
     match handle(state, query.clone()).await {
         Ok(result) => match (result, query) {
             (MathState::Ready { img }, Query::Png(_)) => {
-                image_response(img, color, "image/png", ImageOutputFormat::Png)
+                image_response(img, color, "image/png", ImageFormat::Png)
             }
             (MathState::Ready { img }, Query::Jpeg(_)) => {
-                image_response(img, color, "image/jpeg", ImageOutputFormat::Jpeg(200))
+                image_response(img, color, "image/jpeg", ImageFormat::Jpeg)
             }
             (MathState::Error(errmsg), _) => text_response(&errmsg, StatusCode::BAD_REQUEST),
         },
