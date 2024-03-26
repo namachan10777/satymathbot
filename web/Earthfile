@@ -1,7 +1,7 @@
-VERSION 0.6
+VERSION 0.8
 
 svelte:
-    FROM public.ecr.aws/docker/library/node:stretch-slim
+    FROM public.ecr.aws/docker/library/node:21-bookworm-slim
     WORKDIR /work
     RUN npm i -g pnpm
     COPY package.json /work/
