@@ -50,7 +50,7 @@ impl AppState {
 }
 
 #[derive(Debug)]
-enum InternalError {
+pub enum InternalError {
     CreateFile(io::Error),
     Template(askama::Error),
     WriteFile(io::Error),
@@ -65,7 +65,7 @@ enum InternalError {
 }
 
 #[derive(Debug)]
-enum BadRequest {
+pub enum BadRequest {
     Base64(base64::DecodeError),
     NoUnicode(string::FromUtf8Error),
 }
