@@ -5,55 +5,38 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        node-version: [18, 19, 20]
+        node-version: [20, 21]
     steps:
-    - uses: actions/checkout@v4
-    - uses: pnpm/action-setup@v2
-      with:
-        version: 8.5.1
-    - uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'pnpm'
-        cache-dependency-path: '**/pnpm-lock.yaml'
-    - name: Install
-      run: pnpm install --frozen-lockfile
-      working-directory: web
-    - name: Check
-      run: pnpm run check
-      working-directory: web
-    - name: Build test
-      run: pnpm run build
-      working-directory: web
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
+      - name: Install
+        run: pnpm install --frozen-lockfile
+        working-directory: web
+      - name: Check
+        run: pnpm run check
+        working-directory: web
+      - name: Build test
+        run: pnpm run build
+        working-directory: web
   backend:
     runs-on: ubuntu-22.04
     permissions:
       id-token: write
       contents: read
+    defaults:
+      run:
+        working-directory: app
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          ./app/target
-        key: cargo-v1-${{ hashFiles('**/Cargo.lock') }}
-    - uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        override: true
-        components: rustfmt, clippy
-    - name: Build
-      run: cargo build --verbose
-      working-directory: app
-    - name: Test
-      run: cargo test --verbose
-      working-directory: app
-    - name: Format
-      run: cargo fmt -- --check
-      working-directory: app
-    - name: Clippy
-      run: cargo clippy -- -D warnings
-      working-directory: app
-
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt -- --check
+      - run: cargo clippy --all-features -- -D warnings
+      - run: cargo test --all-features
