@@ -15,8 +15,8 @@ dependencies:
     specifier: ^1.5.1
     version: 1.5.1
   cookie:
-    specifier: 0.6.0
-    version: 0.6.0
+    specifier: 0.7.0
+    version: 0.7.0
 
 devDependencies:
   '@sveltejs/adapter-static':
@@ -1006,6 +1006,12 @@ packages:
   /cookie@0.6.0:
     resolution: {integrity: sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw==}
     engines: {node: '>= 0.6'}
+    dev: true
+
+  /cookie@0.7.0:
+    resolution: {integrity: sha512-qCf+V4dtlNhSRXGAZatc1TasyFO6GjohcOul807YOb5ik3+kQSnb4d7iajeCL8QHaJ4uZEjCgiCJerKXwdRVlQ==}
+    engines: {node: '>= 0.6'}
+    dev: false
 
   /cross-spawn@7.0.3:
     resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}
